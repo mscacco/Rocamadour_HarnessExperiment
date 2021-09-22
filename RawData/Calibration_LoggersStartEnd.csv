@@ -1,0 +1,134 @@
+date,species,individual,type unit,numero unit,heure UTC ON,heure UTC calibr start,Type Calibr start,heure UTC calibr end,Type Calibr end,heure UTC OFF,Frequence (Hz),Rem
+25/06/2018,VH,GISELE,AGM,5,09:25:30,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:27:50,25,
+25/06/2018,VF,HENRI,AGM,6,09:26:00,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:28:50,25,
+25/06/2018,VF,LEON,AGM,7,09:27:00,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:27:35,25,
+25/06/2018,VF,HERCULE,AGM,8,,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,,25,Tag did not start?
+25/06/2018,VH,GAELLE,AT,G,09:24:50,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:30:09,25,Pressure sensor under tape for flights 1 & 2 & 3
+25/06/2018,RAV,MANU/KHAN,AT,H,09:24:50,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:30:40,25,Pressure sensor under tape for flights 1 & 2 free for flight 3
+25/06/2018,RUPPEL,KIRIKOU,AT,I,09:24:50,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:30:22,25,Pressure sensor under tape for flights 1 & 2 & 3
+25/06/2018,CONDOR,KUZCO,AT,J,09:24:50,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:30:15,25,Pressure sensor under tape for flights 1 & 2 free for flight 3
+25/06/2018,PYGTB,LAFAYETTE,AXY1,1,09:28:01,09:34:30,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,11:00:00,25,logger fallen on the ground: probably stopped at that time before the flights
+25/06/2018,PYGTB,DAKOTA,AXY1,2,09:28:30,09:34:30,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,,25,Collected only few data stopped at 09:30
+25/06/2018,VF,GREGOIRE,AXY1,3,09:28:45,09:34:30,5 heave + 5 surge + sway,15:22:00,5 heave + 5 surge + sway,15:25:50,25,
+25/06/2018,VF,GREGOIRE,GIPSY1,3,09:23:00,,,,,,4,
+25/06/2018,VH,GISELE,GIPSY1,5,09:23:00,,,,,,4,
+25/06/2018,VF,HENRI,GIPSY1,6,09:23:00,,,,,,4,
+25/06/2018,VF,HERCULE,GIPSY1,10,09:23:00,,,,,,4,
+25/06/2018,VF,LEON,GIPSY1,13,09:23:00,,,,,,4,
+25/06/2018,PYGTB,DAKOTA,GIPSY1,14,09:23:00,,,,,,4,
+25/06/2018,PYGTB,LAFAYETTE,GIPSY5,A,09:23:00,,,,,,5,
+26/06/2018,VF,HENRI,AGM,5,08:22:45,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:44:50,25,
+26/06/2018,VH,GAELLE,AGM,6,08:22:50,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:42:28,25,
+26/06/2018,RUPPEL,KIRIKOU,AGM,7,08:22:55,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:46:45,25,
+26/06/2018,VF,GREGOIRE,AT,G,08:18:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:26:00,25,
+26/06/2018,CONDOR,KUZCO,AT,H,08:18:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:26:00,25,
+26/06/2018,VF,HERCULE,AT,I,08:18:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:26:00,25,
+26/06/2018,VF,LEON,AT,J,08:18:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:26:00,25,
+26/06/2018,Black Kite,KLEA,AT,Z,08:18:00,08:45:00,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,11:15:00,50,Stopped recording around 11 - recorded at 50 Hz!!
+26/06/2018,RAV,KHAN MANU,AXY1,3,08:22:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:48:50,25,
+26/06/2018,VF,HERCULE,AXY1,4,08:22:30,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,15:49:05,25,
+26/06/2018,VH,GISELE,AXY3,10,08:32:00,08:45:00,5 heave + 5 surge + sway,15:17:00,5 heave + 5 surge + sway,,50,beware data recorded at 50 Hz - record until 21:00 but kept data until 16:00. Timestamp not matching with ending time after re-assigning correct time. Maybe changing sampling frequency. 
+26/06/2018,RAV,KHAN MANU,GIPSY1,3,08:14:00,,,,,15:40:00,4,
+26/06/2018,VF,HERCULE,GIPSY1,4,08:14:00,,,,,15:40:00,4,
+26/06/2018,VF,HENRI,GIPSY1,5,08:14:00,,,,,15:40:00,4,
+26/06/2018,VH,GAELLE,GIPSY1,6,08:14:00,,,,,15:40:00,4,
+26/06/2018,VH,GISELE,GIPSY1,10,08:14:00,,,,,15:40:00,4,
+26/06/2018,RUPPEL,KIRIKOU,GIPSY1,13,08:14:00,,,,,15:40:00,4,
+27/06/2018,VF,HENRI,GIPSY1,3,09:14:00,,,,,16:02:00,4,
+27/06/2018,VF,GREGOIRE,GIPSY1,4,09:14:00,,,,,16:02:00,4,
+27/06/2018,VR,KIRIKOU,GIPSY1,5,09:14:00,,,,,16:02:00,4,
+27/06/2018,VH,GISELE,GIPSY1,6,09:14:00,,,,,16:02:00,4,
+27/06/2018,RAV,MANU/KHAN,GIPSY1,10,09:14:00,,,,,16:02:00,4,
+27/06/2018,VH,GAELLE,GIPSY1,13,09:14:00,,,,,16:02:00,4,
+27/06/2018,CONDOR,KUZCO,GIPSY1,14,09:14:00,,,,,16:02:00,4,
+27/06/2018,Black Kite,KLEA,AT,Z,09:14:00,09:31:00,5 heave + 5 surge + sway,,,12:23:38,50,Recorded at 50 Hz - Stopped at 12:23 with no end calibration
+27/06/2018,PYGTB,DAKOTA,GIPSY5,A,09:14:00,,,,,16:14:49,25,
+27/06/2018,PYGTB,DAKOTA,AXY1,1,09:16:15,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,15:57:30,25,
+27/06/2018,CONDOR,KUZCO,AXY1,2,09:16:30,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,16:07:10,25,
+27/06/2018,VF,HENRI,AXY1,3,09:16:50,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,16:06:00,25,
+27/06/2018,VF,GREGOIRE,AXY1,4,09:16:40,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,16:06:20,25,
+27/06/2018,VR,KIRIKOU,AGM,5,09:17:50,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,,25,Heure UTC off at 16:10:10 or 16:11:53?
+27/06/2018,VH,GISELE,AGM,6,09:17:40,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,16:08:10,25,
+27/06/2018,VH,GAELLE,AGM,7,09:17:30,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,,25,Heure UTC off at 16:12:30 or 16:13:29?
+27/06/2018,PYGTB,MANU/KHAN,AXY3,10,,,,,,,25,LOST
+27/06/2018,VF,LEON,ORNI,66,09:00:00,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,,2,16:12:30 ou 16:13:29
+27/06/2018,VF,HERCULE,ORNI,89,09:00:00,09:31:00,5 heave + 5 surge + sway,15:43:45,5 heave + 5 surge + sway,,2,
+27/06/2018,PYGTB,LAFAYETTE,ORNI,88,09:00:00,,,15:43:45,,15:46:00,2,pas de calib start
+28/06/2018,RAV,MANU,GIPSY1,4,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,VR,KIRIKOU,GIPSY1,14,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,CONDOR,KUZCO,GIPSY1,5,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,VH,GISELE,GIPSY1,13,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,VF,HENRI,GIPSY1,6,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,VF,GREGOIRE,GIPSY1,3,09:02:20,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:18:30,4,
+28/06/2018,RAV,MANU,AXY1,4,09:08:25,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:23:06,25,
+28/06/2018,VR,KIRIKOU,AXY1,2,09:08:10,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:23:40,25,
+28/06/2018,CONDOR,KUZCO,AGM,5,09:09:10,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:24:30,25,
+28/06/2018,VH,GISELE,AGM,7,09:09:50,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:24:10,25,
+28/06/2018,VF,HENRI,AGM,6,09:09:40,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:24:45,25,
+28/06/2018,VF,GREGOIRE,AXY1,3,09:08:35,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:22:37,25,
+28/06/2018,VH,GAELLE,AT,G,09:29:00,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:21:00,25,
+28/06/2018,VF,LEON,ORNI,90,09:02:34,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:20:00,2,
+28/06/2018,VF,HERCULE,ORNI,87,09:02:34,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,,2,
+28/06/2018,RAV,KHAN,AT,J,09:07:00,09:29:35,5 heave + 5 surge + sway,15:15:30,5 heave + 5 surge + sway,15:21:00,25,
+28/06/2018,Black Kite,KLEA,AT,Z,09:10:29,09:29:35,5 heave + 5 surge + sway,,,,50,Recorded at 50 Hz!! only until 12:25
+29/06/2018,VF,HENRI,GIPSY1,3,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,VH,GISELE,GIPSY1,4,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,VF,GREGOIRE,GIPSY1,5,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,VR,KIRIKOU,GIPSY1,6,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,VH,GAELLE,GIPSY1,13,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,VF,LEON,GIPSY1,14,09:11:15,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:30,4,
+29/06/2018,CONDOR,KUZCO,GIPSY5,B,09:13:23,10:13:35,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:12:00,5,
+29/06/2018,CONDOR,KUZCO,AXY1,1,09:11:30,10:13:35,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,,25,Calibrated at 10:00 with AT H - too high values start calibration not found - recorded until 16:14
+29/06/2018,VF,LEON,AXY1,2,09:14:20,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:14:50,25,
+29/06/2018,VF,HENRI,AXY1,3,09:14:40,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:15:10,25,
+29/06/2018,VH,GISELE,AXY1,4,09:14:50,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:16:30,25,
+29/06/2018,VF,GREGOIRE,AGM,5,09:15:30,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:18:22,25,
+29/06/2018,VR,KIRIKOU,AGM,6,09:15:40,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:18:02,25,
+29/06/2018,VH,GAELLE,AGM,7,09:15:50,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:17:35,25,
+29/06/2018,RAV,KAN,AT,H,09:13:27,10:13:35,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:00,25,Calibrated at 10:00 with Axy1 1
+29/06/2018,Black Kite,KLEA,AT,Z,09:13:27,09:32:49,5 heave + 5 surge + sway,,,,25,LOST
+29/06/2018,PYGTB,DAKOTA,AT,I,09:13:27,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:00,25,
+29/06/2018,PYGTB,LAFAYETTE,AT,J,09:13:27,09:32:49,5 heave + 5 surge + sway,17:07:30,5 heave + 5 surge + sway,17:10:00,25,
+29/06/2018,VF,HERCULE,ORNI,171010,09:12:00,,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,15:28:00,2,no calibration
+29/06/2018,RAV,MANU,ORNI,180051,09:12:00,,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,15:28:00,2,no calibration
+30/06/2018,VH,GAELLE,GIPSY1,3,08:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,VF,LEON,GIPSY1,4,08:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,VR,KIRIKOU,GIPSY1,5,09:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,VH,GISELE,GIPSY1,6,10:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,VF,GREGOIRE,GIPSY1,13,11:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,CONDOR,KUZCO,GIPSY1,14,12:13:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:31:00,4,
+30/06/2018,RAV,MANU,GIPSY5,B,08:17:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:32:40,5,
+30/06/2018,RAV,MANU,AXY1,1,08:17:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:37:15,25,
+30/06/2018,CONDOR,KUZCO,AXY1,2,08:18:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:37:38,25,
+30/06/2018,VH,GAELLE,AXY1,3,08:18:30,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:37:55,25,
+30/06/2018,VF,LEON,AXY1,4,08:19:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:38:20,25,
+30/06/2018,VR,KIRIKOU,AGM,5,08:19:20,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:36:39,25,
+30/06/2018,VH,GISELE,AGM,6,08:19:40,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:36:13,25,
+30/06/2018,VF,GREGOIRE,AGM,7,08:20:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:35:57,25,
+30/06/2018,Black Kite,KLEA,AT,G,08:16:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:34:30,25,
+30/06/2018,PYGTB,LAFAYETTE/DAGOBERT,AT,H,08:16:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:34:10,25,
+30/06/2018,RAV,KAN,AT,I,08:16:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:35:03,25,
+30/06/2018,PYGTB,DAKOTA/ RANTANPLAN,AT,J,08:16:00,08:24:00,5 heave + 5 surge + sway,15:05:45,5 heave + 5 surge + sway,15:34:44,25,
+30/06/2018,VF,HENRI,ORNI,87,,,,15:05:45,5 heave + 5 surge + sway,15:06:45,2,no calibration
+30/06/2018,VF,HERCULE,ORNI,066/088,,,,15:05:45,5 heave + 5 surge + sway,15:07:17,2,no calibration
+01/07/2018,VF,HERCULE (LL),GIPSY1,3,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:21:20,4,first calibration at 07:56:35 but not to take into account because some loggers hadn't stop blinking and some AT were in the wrong direction
+01/07/2018,VF,HERCULE (BP),GIPSY1,4,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:21:40,4,
+01/07/2018,VH,GISELE,GIPSY1,5,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:22:55,4,
+01/07/2018,VF,HENRI,GIPSY1,6,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:23:15,4,
+01/07/2018,RAV,MANU,GIPSY1,13,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:21:05,4,
+01/07/2018,VH,GAELLE,GIPSY1,14,07:51:12,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:22:00,4,
+01/07/2018,CONDOR,KUZCO,GIPSY5,B,07:51:50,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:23:39,5,
+01/07/2018,CONDOR,KUZCO,AXY1,1,07:52:40,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:25:04,25,
+01/07/2018,VH,GAELLE,AXY1,2,07:53:00,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:25:20,25,too high values start and end calibrations not found
+01/07/2018,VF,HERCULE (LL),AXY1,3,07:54:35,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:24:00,25,
+01/07/2018,VF,HERCULE (BP),AXY1,4,07:53:23,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:24:15,25,
+01/07/2018,VH,GISELE,AGM,5,07:54:50,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:25:59,25,
+01/07/2018,VF,HENRI,AGM,6,07:55:00,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:26:14,25,
+01/07/2018,RAV,MANU,AGM,7,07:55:10,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:25:40,25,
+01/07/2018,RAV,KAN,AT,G,07:52:10,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:26:45,25,
+01/07/2018,PYGTB,DAKOTA,AT,H,07:52:10,08:00:20,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,,25,Fell in water after 2nd flight
+01/07/2018,VOC/PYGTB,SHARON/DAGOBERT,AT,I,07:52:10,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:27:11,25,
+01/07/2018,Black Kite,KLEA,AT,J,07:52:10,08:00:20,5 heave + 5 surge + sway,15:14:00,5 heave + 5 surge + sway,15:26:29,25,
+01/07/2018,RUPPEL,KIRIKOU,ORNI,87,08:20:00,,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,15:12:00,2,no calibration
+01/07/2018,VF,LEON,ORNI,88,08:20:00,,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,15:11:20,2,no calibration
+01/07/2018,VF,GREGOIRE,ORNI,89,08:20:00,,5 heave + 5 surge + sway,,5 heave + 5 surge + sway,15:11:00,2,no calibration

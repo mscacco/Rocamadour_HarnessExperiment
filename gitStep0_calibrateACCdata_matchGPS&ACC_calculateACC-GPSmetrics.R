@@ -1,11 +1,12 @@
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp")
+# Set working directory to the repository folder
+setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/ScriptsMartina_final/Rocamadour_HarnessExperiment")
 
+# Add milliseconds
 options(digits.secs = 3)
-options(digits = 8)
 
-### For each day, import and format the ACC files from the different devices ####
-#___________________________________________________________________________________
+### 0.1. For each day, import and format the ACC files from the different devices ####
+#_____________________________________________________________________________________
 
 dateFolders <- grep("2018-06|2018-07",list.dirs("RawData", recursive=F), value=T) # all daily folders
 
@@ -30,7 +31,7 @@ for(i in 1:length(dateFolders)){
     acc <- acc[,c("fileID","Date","Time","Timestamp","accX","accY","accZ","deviceID")]
     return(acc)
   })
-  names(Axy_ls) <- sapply(Axy_ls, "[", 1,"deviceID") #paste(oneDay,sapply(Axy_ls, "[", 1,"deviceID"),sep="_")
+  names(Axy_ls) <- sapply(Axy_ls, "[", 1,"deviceID") 
   print("AXYs done!")
   
   # AGM
@@ -38,7 +39,9 @@ for(i in 1:length(dateFolders)){
   Agm_ls <- lapply(1:length(allAGMs), function(j){
     acc <- read.csv(allAGMs[[j]], as.is=T, na.strings = c("","NA"))
     acc <- acc[-nrow(acc),]
-    acc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(acc$Date, acc$Time, sep=" "), format="%d/%m/%Y %H:%M:%OS", tz="UTC"), format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+    acc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(acc$Date, acc$Time, sep=" "), 
+                                                  format="%d/%m/%Y %H:%M:%OS", tz="UTC"), 
+                                       format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
     acc$Date <- as.POSIXct(acc$Date, format="%d/%m/%Y", tz="UTC")
     fileInfo <- gsub(".+/|.csv", "", allAGMs[[j]])
     acc$fileID <- fileInfo
@@ -54,12 +57,14 @@ for(i in 1:length(dateFolders)){
   Axytrek_ls <- lapply(1:length(allAxytreks), function(j){
     gpsAcc <- read.csv(allAxytreks[[j]], as.is=T, na.strings = c("","NA"))
     gpsAcc <- gpsAcc[-nrow(gpsAcc),]
-    gpsAcc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(gpsAcc$Date, gpsAcc$Time, sep=" "), format="%d/%m/%Y %H:%M:%OS", tz="UTC"), format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+    gpsAcc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(gpsAcc$Date, gpsAcc$Time, sep=" "), 
+                                                     format="%d/%m/%Y %H:%M:%OS", tz="UTC"), 
+                                          format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
     gpsAcc$Date <- as.POSIXct(gpsAcc$Date, format="%d/%m/%Y", tz="UTC")
     fileInfo <- gsub(".+/|.csv", "", allAxytreks[[j]])
     gpsAcc$fileID <- fileInfo
-    gpsAcc$deviceID <- paste0("AT_",substr(fileInfo,9,9))
-    acc <- gpsAcc[,c("fileID","Date","Time","Timestamp","X","Y","Z","deviceID")]
+    gpsAcc$deviceID <- paste0("AT_",substr(fileInfo,8,8))
+    acc <- gpsAcc[,c("fileID","Date","Time","Timestamp","Acc-X","Acc-Y","Acc-Z","deviceID")]
     colnames(acc) <- c("fileID","Date","Time","Timestamp","accX","accY","accZ","deviceID")
     return(acc)
   })
@@ -71,21 +76,19 @@ for(i in 1:length(dateFolders)){
   #names(allACC_ls)
   
   # Save the tag list of formatted acc data in a new folder, by day
-  save(allACC_ls, file=paste0("Data_correct/ACC_format/allACCdata_",oneDay,".RData"))
+  save(allACC_ls, file=paste0("formatData/allACCdata_",oneDay,".RData"))
 }
 
 
-### Check matching times at the calibration points (start and end of each day) ####
-#___________________________________________________________________________________
+### 0.2. Check matching times at the calibration points (start and end of each day) ####
+#________________________________________________________________________________________
 # 1. For each Tag, we are going to plot the values with a 40 sec buffer before and after the calibration and look for the calibration waves.
 # 2. We make one plot at a time and store the time at which the waves start in the tag using the locator function.
 # 3. We use the starting and ending time we find to "cut" the data so that all tags start exactly with the calibration.
 # 4. Finally we use the accurate time of the axytrek (AT) and assign the same starting time to all of them.
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
-
 # Import the file with infos about the calibration per tag and per day
-tagCalibrInfos <- read.csv("Calibration_LoggersStartEnd.csv", as.is=T, na.strings=c("","NA"))
+tagCalibrInfos <- read.csv("RawData/Calibration_LoggersStartEnd.csv", as.is=T, na.strings=c("","NA"))
 
 tagCalibrInfos$date <- as.POSIXct(tagCalibrInfos$date, format="%d/%m/%Y", tz="UTC")
 tagCalibrInfos$timestamp.calibration.start <- as.POSIXct(paste(tagCalibrInfos$date,tagCalibrInfos$heure.UTC.calibr.start,sep=" "), format="%Y-%m-%d %H:%M:%S", tz="UTC")
@@ -94,10 +97,10 @@ calibACC <- tagCalibrInfos[grep(tagCalibrInfos$type.unit, patter="AXY|AGM|AT"),]
 # Assign unique deviceID to the calibration data to match the deviceID in the ACC data
 calibACC$deviceID <- paste(calibACC$type.unit,calibACC$numero.unit, sep="_")
 # And store it
-save(calibACC, file="calibrationInfos_onlyACC.RData")
+save(calibACC, file="formatData/calibrationInfos_onlyACC.RData")
 
 # List the files containing the lists of ACC data per day
-ACC_dailyLists <- list.files("ACC_format", full.names = T, pattern="allACCdata")
+ACC_dailyLists <- list.files("formatData", full.names = T, pattern="allACCdata")
 
 # Load each i file of the daily ACC lists
 i=7
@@ -112,12 +115,7 @@ oneDay <- gsub(".+_|.RData","",ACC_dailyLists[[i]])
 # Subset the calibration file to the day of interest
 calibSub <- calibACC[as.character(calibACC$date) == oneDay,]
 
-# # Check that data are correct
-# lapply(allACC_ls, function(acc)rbind(head(acc),tail(acc)))
-# lapply(allACC_ls, str)
-
-
-# 1. Select acc data 40 secs before and after the expected calibration time (from the watch) for comparison ----
+# a. Select acc data 40 secs before and after the expected calibration time (from the watch) for comparison ----
 
 # Store the calibration times recorded with the clock in the same order as the tag list
 calibrTimes_clock <- lapply(1:length(allACC_ls), function(y){
@@ -149,10 +147,9 @@ ACC_cal_end <- lapply(1:length(allACC_ls), function(y) {
 
 n <- length(allACC_ls)
 
-# 2a. Plot start calibration, find start calibration time and store it in a list ----
+# b. Plot start calibration, find start calibration time and store it in a list ----
 
 library(zoom)
-#X11(type = "Xlib")
 
 lapply(ACC_cal_start, nrow)
 
@@ -177,9 +174,9 @@ zm()
 calibrStart_locatedTimes[[w]] <- as.POSIXct(locator(1)$x, origin='1970-01-01', tz="UTC") 
 # Assign to the list of calibration times the names of the tags and save them
 names(calibrStart_locatedTimes) <- tagIDs
-save(calibrStart_locatedTimes, file=paste0("ACC_format/StartCalibration_timesList_",oneDay,".RData"))
+save(calibrStart_locatedTimes, file=paste0("formatData/StartCalibration_timesList_",oneDay,".RData"))
 
-# 2b. Plot end calibration, find start calibration time and store it in a list ----
+# c. Plot end calibration, find start calibration time and store it in a list ----
 
 lapply(ACC_cal_end, nrow)
 
@@ -205,20 +202,15 @@ zm()
 calibrEnd_locatedTimes[[w]] <- as.POSIXct(locator(1)$x, origin='1970-01-01', tz="UTC")
 # Assign to the list of calibration times the names of the tags and save them
 names(calibrEnd_locatedTimes) <- tagIDs
-save(calibrEnd_locatedTimes, file=paste0("ACC_format/EndCalibration_timesList_",oneDay,".RData"))
+save(calibrEnd_locatedTimes, file=paste0("formatData/EndCalibration_timesList_",oneDay,".RData"))
 
 
-# 3. Use the stored times to "cut" the data, so that all start with the calibration ----
-
-options(digits.secs = 2) #Really important in order not to lose the millisecond ;)
-options(digits = 8)
-
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct/ACC_format")
+# d. Use the stored times to "cut" the data, so that all start with the calibration ----
 
 # List the files containing the lists of ACC data per day
-ACC_dailyLists <- list.files(".", full.names = T, pattern="allACCdata")
+ACC_dailyLists <- list.files("formatData", full.names = T, pattern="allACCdata")
 # Load all calibration infos for the ACC files
-load("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct/calibrationInfos_onlyACC.RData")
+load("formatData/calibrationInfos_onlyACC.RData")
 
 # Load each i file of the daily ACC lists
 i=7
@@ -230,8 +222,8 @@ oneDay <- gsub(".+_|.RData","",ACC_dailyLists[[i]])
 calibSub <- calibACC[as.character(calibACC$date) == oneDay,]
 
 #Load corresponding start and end calibration times (objects calibrStart_locatedTimes and calibrEnd_locatedTimes)
-load(list.files(".", pattern=paste0("StartCalibration.+",oneDay), full.names = T))
-load(list.files(".", pattern=paste0("EndCalibration.+",oneDay), full.names = T))
+load(list.files("formatData", pattern=paste0("StartCalibration.+",oneDay), full.names = T))
+load(list.files("formatData", pattern=paste0("EndCalibration.+",oneDay), full.names = T))
 
 # Cut the data to the start and end calibration times
 allACC_ls_sub <- allACC_ls
@@ -250,8 +242,7 @@ names(allACC_ls_sub) <- tagIDs
 lapply(allACC_ls_sub,head)
 lapply(allACC_ls_sub,tail)
 
-
-# 4. Use the time of the Axytreks to assign the time to AGMs and AXYs tags ----
+# e. Use the time of the Axytreks to assign the time to AGMs and AXYs tags ----
 
 myModa <- function(x){names(table(x))[which(table(x)==max(table(x)))]}
 # check the calibration of al axytrecks (having gps time)
@@ -280,37 +271,27 @@ names(allACC_ls_newTime) <- names(allACC_ls_sub)
 lapply(allACC_ls_newTime,head)
 lapply(allACC_ls_newTime,tail)
 
-#allACC_ls_newTime <- allACC_ls_newTime[-3]
-#allACC_ls_newTime[["AT_H"]]$NewTimestamp <- allACC_ls_newTime[["AT_H"]]$Timestamp
+save(allACC_ls_newTime, file=paste0("formatData/allACCdata_correctTimestamp_",oneDay,".RData"))
 
-save(allACC_ls_newTime, file=paste0("allACCdata_correctTimestamp_",oneDay,".RData"))
 
-#test <- allACC_ls_newTime[["AT_Z"]] # on the 2018-07-25 AGM_5 has extra 4 sec at the end calibration
-# difftime(test$NewTimestamp[length(test$NewTimestamp)],test$NewTimestamp[1], units = "secs")/length(test$NewTimestamp)
-# difftime(test$Timestamp[length(test$Timestamp)],test$Timestamp[1], units = "secs")/length(test$Timestamp)
-#test_diff <- difftime(test$Timestamp[-1], test$Timestamp[-length(test$Timestamp)], units = "secs")
-#table(test_diff)
-#test[-1,"Timestamp"][test_diff>0.2]
+### 0.3. Now that time is correct we can smooth the ACC data ####
+#_________________________________________________________________
 
-### Now that time is correct we can smooth the ACC data ####
-#____________________________________________________________
+# Set working directory to the repository folder
+setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/ScriptsMartina_final/Rocamadour_HarnessExperiment")
 
-options(digits.secs = 2) #Really important in order not to lose the millisecond ;)
-options(digits = 8)
 # source function for running mean
-source("/home/mscacco/ownCloud/Martina/PHD/R_functions/ACCsmoothing_staticACC.R")
+source("function_ACCsmoothing_staticACC.R")
 library(plyr)
 library(parallel)
 library(doMC)
 registerDoMC(detectCores()-1)
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct/ACC_format")
-
 # Load all calibration infos to get frequency (Hz) of each device
-load("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct/calibrationInfos_onlyACC.RData")
+load("formatData/calibrationInfos_onlyACC.RData")
 
 # List the files containing the lists of time-corrected ACC data per day
-ACC_dailyLists_correct <- list.files(".", full.names = T, pattern="correctTimestamp_2018")
+ACC_dailyLists_correct <- list.files("formatData", full.names = T, pattern="correctTimestamp_2018")
 
 llply(1:length(ACC_dailyLists_correct), .fun=function(i){  # per day
   load(ACC_dailyLists_correct[[i]])  # object allACC_ls_newTime
@@ -343,24 +324,18 @@ llply(1:length(ACC_dailyLists_correct), .fun=function(i){  # per day
     oneTag$vedba_smooth3s_move <- sqrt((X_dynamic3)^2 + (Y_dynamic3)^2 + (Z_dynamic3)^2)
     oneTag$vedba_smooth025s_noise <- sqrt((X_dynamic025)^2 + (Y_dynamic025)^2 + (Z_dynamic025)^2)
     oneTag$vedba_smooth05s_flap <- sqrt((oneTag$accX_dynamic05s)^2 + (oneTag$accY_dynamic05s)^2 + (oneTag$accZ_dynamic05s)^2)
-    # oneTag$osba_smooth <- abs(oneTag$accX_static) + abs(oneTag$accY_static) + abs(oneTag$accZ_static)
-    # oneTag$vesba_smooth <- sqrt((oneTag$accX_static)^2 + (oneTag$accY_static)^2 + (oneTag$accZ_static)^2)
-    # oneTag$veclength_static <- sqrt(oneTag$accX_static^2 + oneTag$accY_static^2 + oneTag$accZ_static^2)
-    # oneTag$Pitch <- as.circular(asin(oneTag$accX_static), "angle", "radians")
-    # oneTag$Sway <- as.circular(asin(oneTag$accY_static), "angle", "radians")
     oneTag$trunc_timestamp <- trunc.POSIXt(oneTag$NewTimestamp, 'secs')
 
     return(oneTag)
 })
-save(allACC_newTime_smooth, file=paste0("allACCdata_correctTimestamp_smoothedACC_",oneDay,".RData"))
+save(allACC_newTime_smooth, file=paste0("formatData/allACCdata_correctTimestamp_smoothedACC_",oneDay,".RData"))
 })
 
-### And finally aggregate the smoothed ACC data per second (creating "bursts"), and calculate ODBA/VeDBA ####
-#_____________________________________________________________________________________________________________
+### 0.4. Aggregate the smoothed ACC data per second and calculate ODBA/VeDBA ####
+#_________________________________________________________________________________
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct/ACC_format")
 # List the files containing the lists of smoothed ACC data per day
-ACC_dailyLists_smoothed <- list.files(".", full.names = T, pattern="correctTimestamp_smoothedACC")
+ACC_dailyLists_smoothed <- list.files("formatData", full.names = T, pattern="correctTimestamp_smoothedACC")
 
 llply(1:length(ACC_dailyLists_smoothed), .fun=function(i){  # per day
   load(ACC_dailyLists_smoothed[[i]])  # object allACC_newTime_smooth
@@ -425,16 +400,6 @@ llply(1:length(ACC_dailyLists_smoothed), .fun=function(i){  # per day
       propExplPC1 <- summary(pc)$importance[2,"PC1"]
       propExplPC2 <- summary(pc)$importance[2,"PC2"] 
       propExplPC3 <- summary(pc)$importance[2,"PC3"] 
-      # # Finally plot each ACC burst in the segmentation folder
-      # tmp <- trunc.POSIXt(oneBurst$NewTimestamp[1], 'secs')
-      # png(paste0("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Segmentation_plots/ACC_flappingPlots/",deviceID,"_",tmp,".png"),
-      #     7,7, units = "in", res=300)
-      # plot(oneBurst$accX, col="green", type="l", ylim=c(-6,6), 
-      #      main=paste0("vedbaSmooth=",round(mean(oneBurst$vedba_smooth),2),"; vedbaBurst=",round(mean(vedba_burst),2),"; flapFreq=",round(beatsSec,2),"; flapAmpl=",round(amplitude,2)))
-      # lines(oneBurst$accY, col="blue")
-      # lines(oneBurst$accZ, col="red")
-      # dev.off()
-      
       # Return a data.frame with a summary of all ACC infos (one entry per burst)
       return(data.frame(date = as.Date(oneDay), deviceID = as.character(deviceID),
                         correctTimestamp = as.character(oneBurst$trunc_timestamp[1]), 
@@ -449,61 +414,35 @@ llply(1:length(ACC_dailyLists_smoothed), .fun=function(i){  # per day
                         vedbaAvg_smooth025s_noise = mean(oneBurst$vedba_smooth025s_noise), vedbaCum_smooth025s_noise = sum(oneBurst$vedba_smooth025s_noise),
                         avgX = avgx, avgY = avgy, avgZ = avgz,
                         sdX = sdx, sdY = sdy, sdZ = sdz,
-                        # odbaAvg_burst = mean(odba_burst), odbaMedian_burst = median(odba_burst), odbaSd_burst = sd(odba_burst),
-                        # vedbaAvg_burst = mean(vedba_burst), vedbaMedian_burst = median(vedba_burst), vedbaSd_burst = sd(vedba_burst),
-                        # waveFreqX = freqX, waveFreqY = freqY, 
                         waveFreqZ = freqZ, 
-                        # waveAmplX = amplitudeX, waveAmplY = amplitudeY, 
                         waveAmplZ = amplitudeZ,
                         PC1Freq = beatsSec, PC1Ampl = amplitude, #flapping frequency and amplitude
-                        propExplPC1 = propExplPC1 #, propExplPC2 = propExplPC2, propExplPC3 = propExplPC3,
-                        # varWaveWingBeat = var(ffiltpc1_2), 
-                        # varRestWaves = var(pc$x[,"PC1"] - ffiltpc1_2), 
-                        # varOrigWave = var(pc$x[,"PC1"]), 
-                        # eigenValuesPC1wave = eigenValsPC1wave
+                        propExplPC1 = propExplPC1 
                         ))
     }, .parallel=T))
   })
-  save(allACC_newTime_burstStats, file=paste0("allACCdata_correctTimestamp_burstMetricsPerSec_",oneDay,".RData"))
+  save(allACC_newTime_burstStats, file=paste0("formatData/allACCdata_correctTimestamp_burstMetricsPerSec_",oneDay,".RData"))
 })
 
 
-#__________________________________________________________________________
-### Work on the gps files and separate the annotated flight sessions ####
-
-options(digits.secs = 2) #Really important in order not to lose the millisecond ;)
-options(digits = 8)
+### 0.5. Work on the gps files and separate the annotated flight sessions ####
+#______________________________________________________________________________
 
 library(plyr)
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp")
-
-# # Import the file with the description of the flight session per tag and per day
-# flightSessions <- read.csv("FlightSessions.csv", as.is=T, na.strings=c("","NA"))
-# groupComp <- read.csv("GroupComposition.csv", as.is=T, na.strings=c("","NA"))
-# 
-# flightSessions$matchID <- paste(flightSessions$date,flightSessions$individual,flightSessions$GPS_id, sep="_")
-# groupComp$matchID <- paste(groupComp$date,groupComp$individual,groupComp$GPS_id, sep="_")
-# groupComp <- groupComp[order(groupComp$date,groupComp$individual),]
-# 
-# flightSessions_harness <- merge(x=flightSessions, y=groupComp[,c("matchID","ACC_id","harness_type")], by="matchID", all.x=T)
-# flightSessions_harness <- flightSessions_harness[,c(1:7,20:21,8:13)]
-# flightSessions_harness <- flightSessions_harness[order(flightSessions_harness$date,flightSessions_harness$individual,flightSessions_harness$flight),]
-# write.csv(flightSessions_harness, file="FlightSessions_harnessType_deviceID.csv", row.names=F)
-
 # Import the corrected file with the description of the flight session per tag and per day
-flightSessions <- read.csv("Data_correct/FlightSessions_harnessType_deviceID.csv", as.is=T, na.strings=c("","NA"))
+flightSessions <- read.csv("RawData/FlightSessions_harnessType_deviceID.csv", as.is=T, na.strings=c("","NA"))
 flightSessions$date <- as.Date(flightSessions$date, format="%d/%m/%Y")
 flightSessions$flightID <- paste0("gps",flightSessions$GPS_id,"_flight",flightSessions$flight)
 
 # Read the annotated GPS files
-dateFolders <- grep("2018-06|2018-07",list.dirs("Data_raw_SDcardOlivier_Rocamadour2018", recursive=F), value=T) # all daily folders
+dateFolders <- grep("2018-06|2018-07",list.dirs("RawData", recursive=F), value=T) # all daily folders
 
 for(i in 1:length(dateFolders)){
   (oneDay <- gsub(".+/", "", dateFolders[[i]]))
   flightSessions_sub <- flightSessions[flightSessions$date==oneDay,]
   # Work on annotated GPS tags
-  allGPSs <- list.files(paste0("Data_raw_SDcardOlivier_Rocamadour2018/",oneDay,"/Formated_and_annotated_files"), pattern="GPS.*csv|Gipsy.*csv|Axytrek.*csv|AxyTrek.*csv", full.names = T)
+  allGPSs <- list.files(paste0("RawData/",oneDay,"/"), pattern="GPS.*csv|Gipsy.*csv|Axytrek.*csv|AxyTrek.*csv", full.names = T)
   GPStags_ls <- unlist(llply(1:length(allGPSs), .fun=function(j){
     gps <- read.csv(allGPSs[j], as.is=T, na.strings=c("","NA"))
     gps$Date <- as.Date(gps$Date, format="%d/%m/%Y")
@@ -526,7 +465,7 @@ for(i in 1:length(dateFolders)){
   }), recursive=F) #flatten the list to have one list of flight sessions, independently from the tag
 
   # Work on non-annotated Ornitela tags
-  allOrnis <- list.files(paste0("Data_raw_SDcardOlivier_Rocamadour2018/",oneDay,"/Formated_and_annotated_files"), pattern="Orni.*csv", full.names = T)
+  allOrnis <- list.files(paste0("RawData/",oneDay,"/"), pattern="Orni.*csv", full.names = T)
   if(length(allOrnis)==0){flightSessions_ls <- GPStags_ls} #if ornitela are missing stop the llply here and save directly
   if(length(allOrnis)>0){
     ORNItags_ls <- unlist(llply(1:length(allOrnis), .fun=function(j){
@@ -552,13 +491,11 @@ for(i in 1:length(dateFolders)){
     flightSessions_ls <- c(GPStags_ls, ORNItags_ls)
   }
   # Save all annotated flight sessions for all tags as daily lists
-  save(flightSessions_ls, file=paste0("Data_correct/GPS_format/allGPSdata_annotatedFlightSessions_",oneDay,".RData"))
+  save(flightSessions_ls, file=paste0("formatData/allGPSdata_annotatedFlightSessions_",oneDay,".RData"))
 }
 
 ### Resample all GPS data to 1 sec (Gipsy5 recorded at 4 or 5 Hz)
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
-
-GPS_dailyLists_flightSessions <- list.files("GPS_format", pattern="annotatedFlightSessions_2018", full.names = T)
+GPS_dailyLists_flightSessions <- list.files("formatData", pattern="allGPSdata_annotatedFlightSessions_2018", full.names = T)
 for(i in 1:length(GPS_dailyLists_flightSessions)){
   (oneDay <- gsub(".+_|.RData", "", GPS_dailyLists_flightSessions[[i]]))
   load(GPS_dailyLists_flightSessions[i]) #object flightSessions_ls
@@ -566,25 +503,21 @@ for(i in 1:length(GPS_dailyLists_flightSessions)){
     gps1sec <- gps[!duplicated(trunc.POSIXt(gps$Timestamp, 'secs')),] #trunc the timestamp to sec and remove duplicates
     return(gps1sec)
   })
-  save(flightSessions_ls_1s, file=paste0("GPS_format/allGPSdata_annotatedFlightSessions_1secResample_",oneDay,".RData"))
+  save(flightSessions_ls_1s, file=paste0("formatData/allGPSdata_annotatedFlightSessions_1secResample_",oneDay,".RData"))
 }
 
 
-### Finally we can match the GPS information with the aggregated ACC burst metrics ####
+### 0.6. Now we can match the GPS information with the aggregated ACC burst metrics ####
 #_______________________________________________________________________________________
-
-
 library(plyr)
 library(parallel)
 library(doMC)
 registerDoMC(detectCores()-1)
 
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
-
 # List the GPS rdata files containing the gps data per day, per tag and per flight session
-GPS_dailyLists_flightSessions <- list.files("GPS_format", pattern="annotatedFlightSessions_1secResample", full.names = T)
+GPS_dailyLists_flightSessions <- list.files("formatData", pattern="annotatedFlightSessions_1secResample", full.names = T)
 # List the ACC rdata files containing the burst metrics per day and per tag
-ACC_dailyLists_burstMetrics <- list.files("ACC_format", full.names = T, pattern="correctTimestamp_burstMetricsPerSec")
+ACC_dailyLists_burstMetrics <- list.files("formatData", pattern="correctTimestamp_burstMetricsPerSec", full.names = T)
 
 llply(1:length(GPS_dailyLists_flightSessions), function(i){
   (oneDay <- gsub(".+_|.RData", "", GPS_dailyLists_flightSessions[[i]]))
@@ -621,13 +554,11 @@ llply(1:length(GPS_dailyLists_flightSessions), function(i){
     return(gps)
   }, .parallel=T)
   # Finally save the GPS data associated to ACC data in daily lists
-  save(flightSessions_GpsAcc, file=paste0("ACC&GPS_format/allGPS&burstACC_allFlightSessions_",oneDay,"_accSummary.RData") )
+  save(flightSessions_GpsAcc, file=paste0("formatData/allGPS&burstACC_allFlightSessions_",oneDay,"_accSummary.RData") )
 })
 
-### Calculate additional gps metrics using the move package and save it as list of dataframes ####
-#__________________________________________________________________________________________________
-
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
+### 0.7. Calculate additional gps metrics using the move package and save it as list of dataframes ####
+#_______________________________________________________________________________________________________
 
 library(plyr)
 library(parallel)
@@ -639,7 +570,7 @@ direction360 <- function(x){
   return(ifelse(x < 0, 360 + x, x))} 
 
 # List the GPS+ACC rdata files containing the daily lists of data (each element is one flight session)
-data_dailyLists <- list.files("ACC&GPS_format", pattern="accSummary.RData", full.names = T) 
+data_dailyLists <- list.files("formatData", pattern="accSummary.RData", full.names = T) 
 
 for(i in 1:length(data_dailyLists)){
   # Load the move obj
@@ -670,20 +601,18 @@ for(i in 1:length(data_dailyLists)){
     else if(unique(gsub(".+_", "", gps$acc_deviceID))!=unique(gps$ACC_id)){
       stop(paste0("ACC device ",unique(gps$tag_session_id)," not matched correctly"))}}, .parallel=T)
   # Save the result as daily lists of dataframes (one per flight session and per tag)
-  save(flightSessions_gpsList, file=paste0("ACC&GPS_format/allGPS&burstACC_allFlightSessions_",oneDay,"_accSummary&moveVariables.RData"))
+  save(flightSessions_gpsList, file=paste0("formatData/allGPS&burstACC_allFlightSessions_",oneDay,"_accSummary&moveVariables.RData"))
 }
 
 
-### Let's combine this final dataset with the original ACC data points (25 values per second) ####
-#_______________________________________________________________________________________________________
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
-
+### 0.8. Combine the 1 sec dataset with the original ACC data points (25 values per second) ####
+#________________________________________________________________________________________________
 library(move)
 library(lubridate)
 
-data_dailyLists <- list.files("ACC&GPS_format", pattern="moveVariables", full.names = T) 
+data_dailyLists <- list.files("formatData", pattern="moveVariables", full.names = T) 
 
-ACC_dailyLists_smoothed <- list.files("ACC_format", full.names = T, pattern="correctTimestamp_smoothedACC")
+ACC_dailyLists_smoothed <- list.files("formatData", full.names = T, pattern="correctTimestamp_smoothedACC")
 
 for(i in 1:length(data_dailyLists)){
   # Load the move obj
@@ -728,9 +657,6 @@ for(i in 1:length(data_dailyLists)){
       # Rbind the GPS burst infos with the complete 25 Hz ACC info
       gps_acc <- rbind(gps, acc_sub)
       gps_acc <- gps_acc[order(gps_acc$Timestamp),]
-      #length(unique(gps$Timestamp))==length(unique(gps_acc$Timestamp))
-      # Slightly different approach using merge, in this case all gps values would be repeat each 25 times
-      # gps_acc2 <- merge(x=gps, y=acc_sub, by.x="acc_correctTimestamp", by.y="trunc_timestamp", all=T)
       # Repeat the idData information (tag type, ids, flight session etc) also for the acc data points
       gps_acc_ls <- split(gps_acc, gps_acc$trunc_timestamp)
       #table(sapply(gps_acc_ls, nrow))
@@ -743,21 +669,17 @@ for(i in 1:length(data_dailyLists)){
     return(gps_acc)}
     }
   }, .parallel=T)
-  save(gpsList_fullACC, file=paste0("ACC&GPS_format/allGPS&smoothedACC_",oneDay,"_allACCpoints25hz.RData"))
+  save(gpsList_fullACC, file=paste0("formatData/allGPS&smoothedACC_",oneDay,"_allACCpoints25hz.RData"))
 }
 
 
-#___________________________________________________________________________________
-### Merge all sessions and days in one complete dataframe and tidy up columns ####
-
-setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp/Data_correct")
-
+### 0.9. Merge all sessions and days in one complete dataframe and tidy up columns ####
+#_______________________________________________________________________________________
 library(move)
 library(lubridate)
 
 # List the files with the complete gps and acc information (25 Hz)
-GPSfullACC_dailyLists <- list.files("ACC&GPS_format", pattern="allACCpoints25hz", full.names = T) 
-#GPSsummACC_dailyLists <- list.files("ACC&GPS_format", pattern="moveVariables", full.names = T) 
+GPSfullACC_dailyLists <- list.files("formatData", pattern="allACCpoints25hz", full.names = T) 
 
 complete_df <- do.call(rbind, lapply(GPSfullACC_dailyLists, function(gpsList){
   load(gpsList) #object gpsList_fullACC
@@ -810,48 +732,10 @@ complete_df <- complete_df[order(complete_df$tag_session_id, complete_df$Timesta
 str(complete_df)
 summary(complete_df)
 
-#___________________________
-### Save final outputs ####
+### 0.10. Save final outputs ####
+#_________________________________
 
 # Save all flight sessions of all days together in one dataframe
-write.csv(complete_df, file="ACC&GPS_format/completeDF_allFlightSessions_allDays_GPS&smoothACC25hz.csv", row.names = F)
-save(complete_df, file="ACC&GPS_format/completeDF_allFlightSessions_allDays_GPS&smoothACC25hz.rdata")
+write.csv(complete_df, file="formatData/completeDF_allFlightSessions_allDays_GPS&smoothACC25hz.csv", row.names = F)
+save(complete_df, file="formatData/completeDF_allFlightSessions_allDays_GPS&smoothACC25hz.rdata")
 
-# And now one dataset with all the GPS with associated ACC bursts information (1 acc summary per second)
-complete_gps <- complete_df[which(complete_df$sensor=="gps"),c(1:53,70:73)]
-write.csv(complete_gps, file="ACC&GPS_format/completeDF_allFlightSessions_allDays_allGPS&burstACC.csv", row.names = F)
-
-# Same but removing all data without ACC info
-complete_gps_noNa <- complete_gps[!is.na(complete_gps$vedbaAvg_smooth05s_flap),]
-write.csv(complete_gps_noNa, file="ACC&GPS_format/completeDF_allFlightSessions_allDays_GPS&burstACC_noAccNA.csv", row.names = F)
-
-#_______
-# Save separately the control data from Hercule and plots
-dir.create("ACC&GPS_format/Control_Hercule_2018-07-01")
-
-hercLL <- complete_df[complete_df$harnessExp=="control" & complete_df$harness_type=="LegLoop",]
-hercLL_ls <- split(hercLL, hercLL$tag_session_id)
-lapply(hercLL_ls, function(df){
-  write.csv(df, file=paste0("ACC&GPS_format/Control_Hercule_2018-07-01/Hercule_",unique(df$tag_session_id),"_LegLoop.csv"), row.names=F)
-  df$Time <- substr(df$Timestamp, 12, 22)
-  df_sub <- df[which(df$sensor=="acc"),c("Date","Time","accX","accY","accZ")]
-  write.csv(df_sub, file=paste0("ACC&GPS_format/Control_Hercule_2018-07-01/Hercule_",unique(df$tag_session_id),"_LegLoop_subACC.csv"), row.names=F)
-})
-
-hercBP <- complete_df[complete_df$harnessExp=="control" & complete_df$harness_type=="Backpack",]
-hercBP_ls <- split(hercBP, hercBP$tag_session_id)
-lapply(hercBP_ls, function(df){
-  write.csv(df, file=paste0("ACC&GPS_format/Control_Hercule_2018-07-01/Hercule_",unique(df$tag_session_id),"_Backpack.csv"), row.names=F)
-  df$Time <- substr(df$Timestamp, 12, 22)
-  df_sub <- df[which(df$sensor=="acc"),c("Date","Time","accX","accY","accZ")]
-  write.csv(df_sub, file=paste0("ACC&GPS_format/Control_Hercule_2018-07-01/Hercule_",unique(df$tag_session_id),"_Backpack_subACC.csv"), row.names=F)
-})
-
-lapply(hercLL_ls, function(df){
-  df <- df[df$sensor=="gps",]
-  open3d(windowRect=c(65,24,1920,1080)) #big image
-  plot3d(x = df$Longitude, y=df$Latitude, z=df$height.above.msl,
-         type="l", col="black")
-  snapshot3d(filename=paste0("ACC&GPS_format/Control_Hercule_2018-07-01/Hercule_",unique(df$tag_session_id),".png"))
-  rgl.close()
-})
