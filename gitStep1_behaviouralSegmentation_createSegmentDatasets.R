@@ -174,11 +174,12 @@ save(all_classif_summ_behavID, file="formatData/completeDF_allFlightSessions_all
 write.csv(all_classif_summ_behavID, file="formatData/completeDF_allFlightSessions_allDays_GPS&burstACC_behavClassif_ID.csv", row.names=F)
 
 
-# 1.3. Prepare a dataset with the averages values per segments ####
-#___________________________________________________________________
+# 1.3. Prepare final summary datasets for analyses in step 2 and 3 ####
+#______________________________________________________________________
 
-load("formatData/completeDF_allFlightSessions_allDays_GPS&burstACC_behavClassif_ID.rdata")
 dir.create("finalData")
+
+load("formatData/completeDF_allFlightSessions_allDays_GPS&burstACC_behavClassif_ID.rdata") #object all_classif_summ_behavID
 
 length(unique(all_classif_summ_behavID$tag_session_id))
 table(all_classif_summ_behavID$behavID_SoarAct)
@@ -188,6 +189,9 @@ all_classif_summ_behavID$trunc_timestamp <- as.POSIXct(all_classif_summ_behavID$
 
 library(circular)
 all_classif_summ_behavID$direction <- as.circular(all_classif_summ_behavID$direction, template="geographic", units="degrees", rotation="clock")
+
+# a. Create a dataset with the averages values per segments (analyses of step 2) ----
+#_____________________________________________________________________________________
 
 segments_ls <- split(all_classif_summ_behavID, all_classif_summ_behavID$behavID_SoarAct)
 # Keep only segments longer than 5 fixes
@@ -228,8 +232,36 @@ summarySegment$glideRatio.segm[which(summarySegment$kmeanSoar!="glide")] <- NA
 summary(summarySegment$vertDist.cum[which(summarySegment$kmeanSoar!="glide")])
 summarySegment$glideRatio.segm[which(summarySegment$vertDist.cum > -0.1)] <- NA
 
-# Save the dataset for the models
+# Save the dataset for the models (step 2)
 write.csv(summarySegment, "finalData/df_summaryValuesPerSegment.csv", row.names=F)
 
 
+# b. Create a dataset with the summary values per flight session (analyses of step 3) ----
+#__________________________________________________________________________________________
 
+flights_ls <- split(all_classif_summ_behavID, all_classif_summ_behavID$tag_session_id)
+
+summaryFunction <- function(seg){
+  uniqueCols <- t(unlist(apply(seg[,c(2,39:42,45:48,56,57)], 2, FUN=unique)))
+  sumCols <- t(unlist(apply(seg[,c("stepLength","odbaAvg_smooth3s","vedbaAvg_smooth3s_move","vedbaAvg_smooth05s_flap")], 2,FUN=sum, na.rm=T)))
+  colnames(sumCols) <- paste0(colnames(sumCols),".sum")
+  meanCols <- t(unlist(apply(seg[,c("vedbaAvg_smooth025s_noise","vedbaCum_smooth025s_noise")], 2, FUN=mean, na.rm=T)))
+  colnames(meanCols) <- paste0(colnames(meanCols),".mean")
+  flightDuration_sec <- sum(seg$timelag)
+  propSoaring <- sum(seg$timelag[which(seg$kmeanSoarAct=="soar_pass")])/flightDuration_sec
+  propActive <- sum(seg$timelag[which(seg$kmeanAct=="act")])/flightDuration_sec
+  segmDf <- data.frame(start.timestamp=min(seg$trunc_timestamp),
+                       end.timestamp=max(seg$trunc_timestamp),
+                       flightDuration_sec,
+                       propSoaring,
+                       propActive,
+                       uniqueCols, 
+                       sumCols,
+                       meanCols)
+  return(segmDf)
+}
+
+# Apply the summary function to the list of flight sessions and rbind the results
+summaryFlightSession <- do.call(rbind, lapply(flights_ls, summaryFunction))
+# Save the dataset for the flight session analysis (step 3)
+write.csv(summaryFlightSession, "finalData/flightSession_summaryDataset.csv", row.names=F)

@@ -1,85 +1,33 @@
-#__________________________________
-## Flight Session ####
-#__________________________________
 
-#mypath <- "C:/Users/arian/Desktop/MPI/Rocamadour data/"
-mypath <- "/home/mscacco/ownCloud/Arianna" #on Martina's computer
-(setwd(mypath))
-
-#library("readxl")
-datasum_id <- read.csv("Summary_DatasetsPlots/datasum_id.csv", as.is=T)
-
-datasum_id<-datasum_id[which(datasum_id$harness_type %in% c("Backpack","LegLoop")),]
-datasum_id<-datasum_id[which(datasum_id$harnessExp %in% c("treatment")),]
-datasum_id <- datasum_id[which(!datasum_id$tag_session_id %in% c('2018-07-01_gps3_acc3_flight1','2018-06-29_gps14_acc2_flight2','2018-07-01_gps4_acc4_flight1','2018-06-26_gps4_acc4_flight2')),]
+## Flight Session Analysis ####
+#_______________________________
 
 library(lubridate)
-datasum_id$start.timestamp <- as.POSIXct(strptime(datasum_id$start.timestamp,
-                                                  format="%Y-%m-%d %H:%M:%S", tz="UTC"))
-datasum_id$hour<-as.numeric(hour(datasum_id$start.timestamp))
 
-# ricodifico le classi per evitare scritte troppo lunghe nei grafici
-label<-data.frame(species_id=unique(datasum_id$species_id),species_new=c("GV","HV","RV","TWE","COND","BDE","BK"),stringsAsFactors = F)
-datasum_id<-merge(datasum_id, label, by="species_id", all.x=T)
+# Set working directory to the repository folder
+setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/ScriptsMartina_final/Rocamadour_HarnessExperiment")
 
-datasum_id <- datasum_id[which(datasum_id$species_id %in% c('VF','VR','VH','BK','RAV')),]
+# Import summary information related to each flight session (dataset created in step 1.3.b)
+df_FL <- read.csv("finalData/flightSession_summaryDataset.csv", as.is=T)
 
-harness_code <- rep("BP", nrow(datasum_id))
-harness_code[datasum_id$harness_type=="LegLoop"] <- "LL"
+# Apply the same filters used in the treatment analysis (step 2):
+# filter out tail attachment, control group, "perch to perch" flight sessions and species that were equipped with only one of the two harness types
+df_FL <- df_FL[which(df_FL$harness_type %in% c("Backpack","LegLoop")),]
+df_FL <- df_FL[which(df_FL$harnessExp %in% c("treatment")),]
+df_FL <- df_FL[which(!df_FL$tag_session_id %in% c('2018-07-01_gps3_acc3_flight1','2018-06-29_gps14_acc2_flight2','2018-07-01_gps4_acc4_flight1','2018-06-26_gps4_acc4_flight2')),]
+df_FL <- df_FL[which(df_FL$species_id %in% c('VF','VR','VH','BK','RAV')),]
 
-
-hist(datasum_id$vedbaAvg_smooth3s_move.sum, breaks="FD")
-png("vedbaAvg_smooth3s_move.sum~harness_code.png", 15, 5, unit='in', res=300)
-boxplot(vedbaAvg_smooth3s_move.sum~harness_code+species_new,
-        ylab="Cumulative VeDBA (g)",
-        col=c("chocolate","lightblue"),
-        data=datasum_id)
-legend("topleft", pch=19, c("Backpack","Leg-loop"), col=c("chocolate","lightblue"), bty="n")
-dev.off()
-
-hist(sqrt(datasum_id$stepLength.sum), breaks="FD")
-png("stepLength.sum~harness_type.png", 15, 5, unit='in', res=300)
-boxplot(stepLength.sum~harness_code+species_new,
-        ylab="Cumulative distance (m)",
-        col=c("chocolate","lightblue"),
-        data=datasum_id)
-legend("topleft", pch=19, c("Backpack","Leg-loop"), col=c("chocolate","lightblue"), bty="n")
-dev.off()
-
-hist(datasum_id$flightDuration_sec)
-png("flightDuration_min~harness_type.png", 15, 5, unit='in', res=300)
-boxplot(flightDuration_sec/60~harness_code+species_new,
-        ylab="Flight duration (min)",
-        col=c("chocolate","lightblue"),
-        data=datasum_id)
-legend("topleft", pch=19, c("Backpack","Leg-loop"), col=c("chocolate","lightblue"), bty="n")
-dev.off()
-
-boxplot(flightDuration_sec~hour, data=datasum_id)
-boxplot(flightDuration_sec~Date, data=datasum_id)
-
-png("propSoaring~harness_type.png", 15, 5, unit='in', res=300)
-boxplot(propSoaring~harness_code+species_new,
-        ylab="Prop time spent in soaring flight",
-        col=c("chocolate","lightblue"),
-        data=datasum_id)
-legend("topleft", pch=19, c("Backpack","Leg-loop"), col=c("chocolate","lightblue"), bty="n")
-dev.off()
-
-png("propActive~harness_type.png", 15, 5, unit='in', res=300)
-boxplot(propActive~harness_code+species_new,
-        ylab="Prop time spent in active flight",
-        col=c("chocolate","lightblue"),
-        data=datasum_id)
-legend("topleft", pch=19, c("Backpack","Leg-loop"), col=c("chocolate","lightblue"), bty="n")
-dev.off()
+# Format timestamp
+df_FL$start.timestamp <- as.POSIXct(strptime(df_FL$start.timestamp, format="%Y-%m-%d %H:%M:%S", tz="UTC"))
+df_FL$hour <- as.numeric(hour(df_FL$start.timestamp))
 
 # Create lists by harness type and species
-table(datasum_id$species_new, datasum_id$harness_type)
-LL_list <- datasum_id[datasum_id$harness_type=="LegLoop",]
+table(df_FL$species_new, df_FL$harness_type)
+
+LL_list <- df_FL[df_FL$harness_type=="LegLoop",]
 LL_list <- split(LL_list, LL_list$species_new)
 
-BP_list <- datasum_id[datasum_id$harness_type=="Backpack",]
+BP_list <- df_FL[df_FL$harness_type=="Backpack",]
 BP_list <- split(BP_list, BP_list$species_new)
 
 # Differences will be calculated between the two types of harness within each species
@@ -170,15 +118,3 @@ summary(diff_df$diffCumVedba)
 wilcox.test(abs(diff_df$diffCumVedba), mu = mean(abs(baseCumVedba)), alternative="greater")
 wilcox.test(diff_df$diffCumVedba, baseCumVedba)
 
-
-## No combination of rows
-# if(nrow(x)>nrow(y)){
-#   xsub <- x[sample(1:nrow(x), nrow(y)),]
-#   diff.df <- data.frame(diffDuration=abs(x_sub$flightDuration_sec-y$flightDuration_sec),
-#                         diffPropSoaring=abs(x_sub$propSoaring-y$propSoaring),
-#                         diffPropActive=abs(x_sub$propActive-y$propActive),
-#                         diffStepLength=abs(x_sub$stepLength.sum-y$stepLength.sum),
-#                         diffCumVedba=abs(x_sub$vedbaAvg_smooth05s_flap.sum-y$vedbaAvg_smooth05s_flap.sum))
-#   return(diff.df)
-#   
-# }

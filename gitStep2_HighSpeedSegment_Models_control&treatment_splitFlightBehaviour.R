@@ -6,7 +6,7 @@ setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExp
 # 2.1. FILTERING - Create final dataset ####
 #____________________________________________
 
-#Import dataset where each row corresponds to one behavioural segment, with no filters applied
+#Import dataset where each row corresponds to one behavioural segment (dataset created in step 1.3.a)
 df_segments <- read.csv("finalData/df_summaryValuesPerSegment.csv", as.is = T)
 
 # Check which species have which tag attachment
