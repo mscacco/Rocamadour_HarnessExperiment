@@ -1,14 +1,13 @@
-#library(readxl) #for read_xlsx
 
 setwd("/home/mscacco/ownCloud/Martina/PHD/Rocamadour_harnessExp")
 
-options(digits.secs = 3) #Really important in order not to lose the millisecond ;)
+options(digits.secs = 3)
 options(digits = 8)
 
 ### For each day, import and format the ACC files from the different devices ####
 #___________________________________________________________________________________
 
-dateFolders <- grep("2018-06|2018-07",list.dirs("Data_raw_SDcardOlivier_Rocamadour2018", recursive=F), value=T) # all daily folders
+dateFolders <- grep("2018-06|2018-07",list.dirs("RawData", recursive=F), value=T) # all daily folders
 
 for(i in 1:length(dateFolders)){
 
