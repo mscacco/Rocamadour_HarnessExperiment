@@ -17,33 +17,34 @@ for(i in 1:length(dateFolders)){
   print(oneDay)
 
   # Axy1
-  allAXYs <- list.files(dayFolder, pattern="AXY.*csv", full.names = T)
-  allAXYs <- allAXYs[file.size(allAXYs) > 1000000] #Select only files > 1 Mb (1000000 bytes)
+  allAXYs <- list.files(dayFolder, pattern="AXY.*zip", full.names = T)
   Axy_ls <- lapply(1:length(allAXYs), function(j){
-    acc <- read.csv(allAXYs[[j]], as.is=T, na.strings = c("","NA"), sep="\t", header=F)
-    colnames(acc) <- c("Date","Time","accX","accY","accZ")
-    acc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(acc$Date, acc$Time, sep=" "), format="%d/%m/%Y %H:%M:%OS", tz="UTC"), format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
-    acc$Date <- as.POSIXct(acc$Date, format="%d/%m/%Y", tz="UTC")
-    fileInfo <- gsub(".+/|.csv", "", allAXYs[[j]])
-    acc$fileID <- fileInfo
-    if(as.integer(substr(fileInfo,4,5))<10){acc$deviceID <- paste0("AXY1_",substr(fileInfo,5,5))}
-    if(as.integer(substr(fileInfo,4,5))==10){acc$deviceID <- paste0("AXY3_",substr(fileInfo,4,5))}
-    acc <- acc[,c("fileID","Date","Time","Timestamp","accX","accY","accZ","deviceID")]
-    return(acc)
+    if(file.size(unzip(allAXYs[[j]])) > 1000000){  # Run only for files > 1 Mb (1000000 bytes)
+      acc <- read.csv(unzip(allAXYs[[j]]), as.is=T, na.strings = c("","NA"), sep="\t", header=F)
+      colnames(acc) <- c("Date","Time","accX","accY","accZ")
+      acc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(acc$Date, acc$Time, sep=" "), format="%d/%m/%Y %H:%M:%OS", tz="UTC"), format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+      acc$Date <- as.POSIXct(acc$Date, format="%d/%m/%Y", tz="UTC")
+      fileInfo <- gsub(".+/|.zip", "", allAXYs[[j]])
+      acc$fileID <- fileInfo
+      if(as.integer(substr(fileInfo,4,5))<10){acc$deviceID <- paste0("AXY1_",substr(fileInfo,5,5))}
+      if(as.integer(substr(fileInfo,4,5))==10){acc$deviceID <- paste0("AXY3_",substr(fileInfo,4,5))}
+      acc <- acc[,c("fileID","Date","Time","Timestamp","accX","accY","accZ","deviceID")]
+      return(acc)
+    }
   })
   names(Axy_ls) <- sapply(Axy_ls, "[", 1,"deviceID") 
   print("AXYs done!")
   
   # AGM
-  allAGMs <- list.files(dayFolder, pattern="AGM.*csv", full.names = T)
+  allAGMs <- list.files(dayFolder, pattern="AGM.*zip", full.names = T)
   Agm_ls <- lapply(1:length(allAGMs), function(j){
-    acc <- read.csv(allAGMs[[j]], as.is=T, na.strings = c("","NA"))
+    acc <- read.csv(unzip(allAGMs[[j]]), as.is=T, na.strings = c("","NA"))
     acc <- acc[-nrow(acc),]
     acc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(acc$Date, acc$Time, sep=" "), 
                                                   format="%d/%m/%Y %H:%M:%OS", tz="UTC"), 
                                        format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
     acc$Date <- as.POSIXct(acc$Date, format="%d/%m/%Y", tz="UTC")
-    fileInfo <- gsub(".+/|.csv", "", allAGMs[[j]])
+    fileInfo <- gsub(".+/|.zip", "", allAGMs[[j]])
     acc$fileID <- fileInfo
     acc$deviceID <- paste0("AGM_",substr(fileInfo,5,5))
     acc <- acc[,c("fileID","Date","Time","Timestamp","accX","accY","accZ","deviceID")]
@@ -53,15 +54,15 @@ for(i in 1:length(dateFolders)){
   print("AGMs done!")
   
   # AxiTrek (both acc and gps)
-  allAxytreks <- list.files(dayFolder, pattern="Axytrek.*csv|AxyTrek.*csv", full.names = T)
+  allAxytreks <- list.files(dayFolder, pattern="Axytrek.*zip|AxyTrek.*zip", full.names = T)
   Axytrek_ls <- lapply(1:length(allAxytreks), function(j){
-    gpsAcc <- read.csv(allAxytreks[[j]], as.is=T, na.strings = c("","NA"))
+    gpsAcc <- read.csv(unzip(allAxytreks[[j]]), as.is=T, na.strings = c("","NA"))
     gpsAcc <- gpsAcc[-nrow(gpsAcc),]
     gpsAcc$Timestamp <- as.POSIXct(format(as.POSIXct(paste(gpsAcc$Date, gpsAcc$Time, sep=" "), 
                                                      format="%d/%m/%Y %H:%M:%OS", tz="UTC"), 
                                           format="%Y-%m-%d %H:%M:%OS4"), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
     gpsAcc$Date <- as.POSIXct(gpsAcc$Date, format="%d/%m/%Y", tz="UTC")
-    fileInfo <- gsub(".+/|.csv", "", allAxytreks[[j]])
+    fileInfo <- gsub(".+/|.zip", "", allAxytreks[[j]])
     gpsAcc$fileID <- fileInfo
     gpsAcc$deviceID <- paste0("AT_",substr(fileInfo,8,8))
     acc <- gpsAcc[,c("fileID","Date","Time","Timestamp","Acc-X","Acc-Y","Acc-Z","deviceID")]
@@ -291,10 +292,10 @@ registerDoMC(detectCores()-1)
 load("formatData/calibrationInfos_onlyACC.RData")
 
 # List the files containing the lists of time-corrected ACC data per day
-ACC_dailyLists_correct <- list.files("formatData", full.names = T, pattern="correctTimestamp_2018")
+ACC_dailyLists_correct <- list.files("formatData", full.names = T, pattern="correctTimestamp_2018.*zip")
 
 llply(1:length(ACC_dailyLists_correct), .fun=function(i){  # per day
-  load(ACC_dailyLists_correct[[i]])  # object allACC_ls_newTime
+  load(unzip(ACC_dailyLists_correct[[i]]))  # object allACC_ls_newTime
   # Extract tag IDs and date
   tagIDs <- names(allACC_ls_newTime)
   (oneDay <- gsub(".+_|.RData","",ACC_dailyLists_correct[[i]]))
@@ -442,9 +443,9 @@ for(i in 1:length(dateFolders)){
   (oneDay <- gsub(".+/", "", dateFolders[[i]]))
   flightSessions_sub <- flightSessions[flightSessions$date==oneDay,]
   # Work on annotated GPS tags
-  allGPSs <- list.files(paste0("RawData/",oneDay,"/"), pattern="GPS.*csv|Gipsy.*csv|Axytrek.*csv|AxyTrek.*csv", full.names = T)
+  allGPSs <- list.files(paste0("RawData/",oneDay,"/"), pattern="GPS.*zip|Gipsy.*zip|Axytrek.*zip|AxyTrek.*zip", full.names = T)
   GPStags_ls <- unlist(llply(1:length(allGPSs), .fun=function(j){
-    gps <- read.csv(allGPSs[j], as.is=T, na.strings=c("","NA"))
+    gps <- read.csv(unzip(allGPSs[j]), as.is=T, na.strings=c("","NA"))
     gps$Date <- as.Date(gps$Date, format="%d/%m/%Y")
     gps$Timestamp <- as.POSIXct(paste0(gps$Date," ",gps$Time), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
     names(gps)[names(gps)%in%c("behaviour","behavior")] <- "flightSession"
@@ -465,11 +466,11 @@ for(i in 1:length(dateFolders)){
   }), recursive=F) #flatten the list to have one list of flight sessions, independently from the tag
 
   # Work on non-annotated Ornitela tags
-  allOrnis <- list.files(paste0("RawData/",oneDay,"/"), pattern="Orni.*csv", full.names = T)
+  allOrnis <- list.files(paste0("RawData/",oneDay,"/"), pattern="Orni.*zip", full.names = T)
   if(length(allOrnis)==0){flightSessions_ls <- GPStags_ls} #if ornitela are missing stop the llply here and save directly
   if(length(allOrnis)>0){
     ORNItags_ls <- unlist(llply(1:length(allOrnis), .fun=function(j){
-      gps <- read.csv(allOrnis[j], as.is=T, na.strings=c("","NA"))
+      gps <- read.csv(unzip(allOrnis[j]), as.is=T, na.strings=c("","NA"))
       gps <- gps[which(gps$datatype=="GPS"),]
       gps$Timestamp <- as.POSIXct(gps$UTC_datetime, format="%Y-%m-%d %H:%M:%OS", tz="UTC")
       gps <- gps[,c("UTC_date","Timestamp","Longitude","Latitude","Altitude_m","flightSession","satcount","hdop","device_id")]
