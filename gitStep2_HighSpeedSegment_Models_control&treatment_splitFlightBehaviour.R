@@ -221,6 +221,15 @@ anova(grSpeed_glide, grSpeed_glide2)
 summary(grSpeed_glide2)
 # The interaction is significant! Both harness type and species*harness are kept in the model.
 
+#Calculate effect of leg-loop on black kite and on Hinalayan vulture
+#For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.37
+# For himalayan vulture is: Intercept + Himalayan vult + LL + LL:Himalayan vult,
+# so the difference between a him vult wearing a BP and a LL is:
+bp=9.19+4.61 #Him Vult wearing BP
+ll=9.19+4.61+1.37-2.12
+bp
+ll
+
 
 # c. GLIDE RATIO MODEL ----
 # __________________________
@@ -229,6 +238,7 @@ hist(sqrt(highSp_segments$glideRatio.segm), breaks="FD")
 summary(highSp_segmentsGlide$vertSpeed.mean[which(highSp_segmentsGlide$glideRatio.segm > 100)])
 summary(highSp_segmentsGlide$vertDist.cum[highSp_segmentsGlide$glideRatio.segm > 100])
 summary(highSp_segmentsGlide$glideRatio.segm[highSp_segmentsGlide$vertSpeed.mean < -0.2])
+summary(highSp_segmentsGlide$glideRatio.segm)
 summary(highSp_segmentsGlide$vertDist.cum[highSp_segmentsGlide$vertSpeed.mean > -0.2 & highSp_segmentsGlide$vertSpeed.mean < -0.01])
 
 # Run glide ratio model only on gliding segments with vertical speed < -0.2 m/s
@@ -342,6 +352,12 @@ height_glide3 <- lmer(log(height.above.msl.max)~
 anova(height_glide3, height_glide2)
 # The effect of harness type is significant and legloop birds reach higher heights during gliding
 
+# Correct interpretation of log-linear models should be: %changeY = 100 * (e^beta - 1)
+# But for very small beta, e^beta ~= 1 + beta, so %changeY ~= beta
+# exp(x) == e^x
+100*(exp(0.19)-1)
+100*(exp(0.11)-1)
+
 
 # e. VEDBA MODEL ----
 # ___________________
@@ -388,6 +404,10 @@ anova(vedba_pass3, vedba_pass2)
 # Legloop individuals spend 0.08% less energy than backpack individuals
 
 # With log transformation coefficient are interpreted as percentages of change in the response variable
+# Correct interpretation of log-linear models should be: %changeY = 100 * (e^beta - 1)
+# But for very small beta, e^beta ~= 1 + beta, so %changeY ~= beta
+# exp(x) == e^x
+100*(exp(0.08)-1)
 
 
 # 2.3. T-TEST for CONTROL - Individual HERCULE ####

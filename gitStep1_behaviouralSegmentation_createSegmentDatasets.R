@@ -209,7 +209,7 @@ summarySegment <- do.call(rbind, lapply(segments_ls, function(seg){
                        end.timestamp=max(seg$trunc_timestamp),
                        uniqueCols, 
                        meanCols,
-                       direction=mean.circular(seg$direction, na.rm=T),
+                       trackDirection.mean=mean.circular(seg$direction, na.rm=T),
                        height.above.msl.max=max(seg$height.above.msl, na.rm=T),
                        horizDist.mean=mean(seg$stepLength, na.rm=T),
                        horizDist.cum=sum(seg$stepLength),
