@@ -235,8 +235,31 @@ summarySegment$glideRatio.segm[which(summarySegment$vertDist.cum > -0.1)] <- NA
 # Save the dataset for the models (step 2)
 write.csv(summarySegment, "finalData/df_summaryValuesPerSegment.csv", row.names=F)
 
+# b. To the same segment dataset, assocaite ENV variables from Movebank to calculate wind speed and airspeed (analyses of step 2) ----
+#_____________________________________________________________________________________________________________________________________
 
-# b. Create a dataset with the summary values per flight session (analyses of step 3) ----
+df_segments <- read.csv("finalData/df_summaryValuesPerSegment.csv", as.is = T)
+
+# Calculate tiemstamp corresponding to the middle point of the segment
+df_segments$start.timestamp <- as.POSIXct(df_segments$start.timestamp, format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+df_segments$end.timestamp <- as.POSIXct(df_segments$end.timestamp, format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+#head(df_segments$segmDuration);head(difftime(df_segments$end.timestamp, df_segments$start.timestamp, units="secs"))
+# Since the frequency is 1 second we can take the timestamp of the location at the half of the segment using seq
+midTime <- function(i){return(as.character(seq.POSIXt(df_segments$start.timestamp[i], df_segments$end.timestamp[i], by="1 sec")[round(df_segments$segmDuration[i]/2)]))}
+df_segments$mid.timestamp <- as.POSIXct(sapply(1:nrow(df_segments), midTime), format="%Y-%m-%d %H:%M:%OS", tz="UTC")
+# Format the dataset to be uploaded to movebank and annotated with env variables
+df_segments_mb <- df_segments
+df_segments_mb$timestamp <- strftime(df_segments$mid.timestamp, format="%Y-%m-%d %H:%M:%OS3")
+df_segments_mb[,"location-lat"] <- df_segments$Latitude.mean
+df_segments_mb[,"location-long"] <- df_segments$Longitude.mean
+df_segments_mb[,"height-above-msl"] <- df_segments$height.above.msl.mean
+# Sort the columns and save for movebank annotation
+df_segments_mb <- df_segments_mb[,c(44:47,1:43)]
+write.csv(df_segments_mb, "finalData/df_summaryValuesPerSegment_4movebank.csv", row.names=F)
+
+
+
+# c. Create a dataset with the summary values per flight session (analyses of step 3) ----
 #__________________________________________________________________________________________
 
 flights_ls <- split(all_classif_summ_behavID, all_classif_summ_behavID$tag_session_id)
@@ -265,3 +288,23 @@ summaryFunction <- function(seg){
 summaryFlightSession <- do.call(rbind, lapply(flights_ls, summaryFunction))
 # Save the dataset for the flight session analysis (step 3)
 write.csv(summaryFlightSession, "finalData/flightSession_summaryDataset.csv", row.names=F)
+
+
+# 1.4. AIRSPEED - Use movebank annotated data to calculate wind variables (analysis step 2) ####
+#________________________________________________________________________________________________
+
+source("function_calculateWindVariables.R") #functions wind.support, cross.wind, airspeed, direction360
+
+#Import movebank data where each row corresponds to one behavioural segment, with no filters applied
+df_segments <- read.csv("finalData/df_summaryValuesPerSegment_EnvFromMovebank.csv", as.is = T)
+names(df_segments)[names(df_segments) %in% 
+                     c("ECMWF.ERA5.PL.U.Wind","ECMWF.ERA5.PL.V.Wind","ASTER.ASTGTM2.Elevation")] <- c("Uwind", "Vwind", "asterDEM")
+
+# Calculate wind support, cross wind and airspeed
+df_segments$trackDirection.mean360 <- direction360(df_segments$trackDirection.mean)
+df_segments$windSupport <- wind.support(u=df_segments$Uwind, v=df_segments$Vwind, dg=df_segments$trackDirection.mean360)
+df_segments$crossWind <- cross.wind(u=df_segments$Uwind, v=df_segments$Vwind, dg=df_segments$trackDirection.mean360)
+df_segments$airspeed <- airspeed(Vg=df_segments$grSpeed.mean, Ws=df_segments$windSupport, Cw=df_segments$crossWind)
+
+write.csv(df_segments, "finalData/df_summaryValuesPerSegment_wind.csv", row.names=F)
+

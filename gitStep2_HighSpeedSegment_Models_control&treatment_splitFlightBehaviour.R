@@ -6,8 +6,8 @@ setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExp
 # 2.1. FILTERING - Create final dataset ####
 #____________________________________________
 
-#Import dataset where each row corresponds to one behavioural segment (dataset created in step 1.3.a)
-df_segments <- read.csv("finalData/df_summaryValuesPerSegment.csv", as.is = T)
+#Import dataset where each row corresponds to one behavioural segment (dataset created in step 1.3.b, wind variables calculated in step 1.4)
+df_segments <- read.csv("finalData/df_summaryValuesPerSegment_wind.csv", as.is = T)
 
 # Check which species have which tag attachment
 table(df_segments$harness_type, df_segments$species_id)
@@ -44,6 +44,9 @@ summary(highSp_segments$grSpeed.mean)
 nrow(LowSp_segments)==length(unique(LowSp_segments$behavID_SoarAct))
 
 #Look at distribution of response variables in the two sub-datasets (high and low speed segments)
+hist(LowSp_segments$airspeed, breaks = "FD")
+hist(highSp_segments$airspeed, breaks = "FD")
+
 hist(LowSp_segments$vedbaAvg_smooth3s_move.mean, breaks = "FD")
 hist(highSp_segments$vedbaAvg_smooth3s_move.mean, breaks = "FD")
 
@@ -55,7 +58,7 @@ hist(sqrt(highSp_segments$glideRatio.segm), breaks="FD")
 summary(highSp_segments$glideRatio.segm)
 
 #Save only high speed segments data to be used in the models
-save(highSp_segments, file="finalData/ModelDatasets_PerSegment_HIGHspeeds.rdata")
+save(highSp_segments, file="finalData/ModelDatasets_PerSegment_HIGHspeeds_wind.rdata")
 
 
 # 2.2. MODELS treatment group ####
@@ -70,8 +73,8 @@ library(sp)
 library(geosphere)
 source("function_standardError.R") #function stderr
 
-# Import model dataset (only high speed segments)
-load("finalData/ModelDatasets_PerSegment_HIGHspeeds.rdata") #object highSp_segments
+# Import model dataset (we will use only high speed segments)
+load("finalData/ModelDatasets_PerSegment_HIGHspeeds_wind.rdata") #object highSp_segments
 
 # Exclude data related to Hercule (the control individual)
 highSp_segments <- highSp_segments[which(highSp_segments$harnessExp %in% c("treatment")),]
@@ -110,7 +113,8 @@ highSp_segments <- highSp_segments[order(highSp_segments$tag_session_id,highSp_s
 ## Split soaring and gliding segments in two datasets to apply models separately
 highSp_segmentsSoar <- highSp_segments[which(highSp_segments$kmeanSoar=="soar"),]
 highSp_segmentsGlide <- highSp_segments[which(highSp_segments$kmeanSoar=="glide"),]
-
+table(highSp_segments$kmeanAct)
+table(highSp_segments$kmeanSoar[highSp_segments$kmeanAct=="act"])
 
 # a. VERTICAL SPEED MODEL ----
 # _____________________________
@@ -135,7 +139,10 @@ vertSpeed_soar2 <- lmer(vertSpeed.mean~
 anova(vertSpeed_soar, vertSpeed_soar2)
 # The interaction is significant, so both harness type and interaction species*harness are kept in the model
 # Legloop birds have higher climbing rate
+# Response is not transformed, estimates are in m/s, no backtransformation needed 
 
+q=quantile(highSp_segmentsGlide$vertSpeed.mean, seq(0,0.1, 0.001))
+plot(q)
 vertSpeed_glide <- lmer(vertSpeed.mean~
                          harness_type*species_id+hourScale+
                          nFixes+
@@ -163,72 +170,70 @@ vertSpeed_glide3 <- lmer(vertSpeed.mean~
                          data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
 anova(vertSpeed_glide3,vertSpeed_glide2)
 # The harness type is slightly significant and indicates lower sink speed when gliding!
+# Response is not transformed, estimates are in m/s, no backtransformation needed 
 
 
-# b. GROUND (HORIZONTAL) SPEED MODEL ----
-# _______________________________________
-grSpeed_soar <- lmer(sqrt(grSpeed.mean)~
-                         harness_type*species_id+hourScale+
-                         nFixes+
-                         (1|individual)+(1|Date),
-                       data=highSp_segmentsSoar)
-summary(grSpeed_soar, correlation=F)
-# Check for the overall effect of the species*harness interaction
-grSpeed_soar2 <- lmer(sqrt(grSpeed.mean)~
-                       harness_type+species_id+hourScale+
+# b. AIRSPEED MODEL ----
+# _______________________
+
+airspeed_soar <- lmer(airspeed~
+                       harness_type*species_id+hourScale+
                        nFixes+
                        (1|individual)+(1|Date),
                      data=highSp_segmentsSoar)
-anova(grSpeed_soar, grSpeed_soar2)
-summary(grSpeed_soar2, correlation=F)
+summary(airspeed_soar, correlation=F)
+# Check for the overall effect of the species*harness interaction
+airspeed_soar2 <- lmer(airspeed~
+                        harness_type+species_id+hourScale+
+                        nFixes+
+                        (1|individual)+(1|Date),
+                      data=highSp_segmentsSoar)
+anova(airspeed_soar, airspeed_soar2)
+summary(airspeed_soar2, correlation=F)
 # Since the interaction is not significant, check for overall effect of the harness type
-grSpeed_soar3 <- lmer(sqrt(grSpeed.mean)~
+airspeed_soar3 <- lmer(airspeed~
                         species_id+hourScale+
                         nFixes+
                         (1|individual)+(1|Date),
                       data=highSp_segmentsSoar)
-anova(grSpeed_soar3, grSpeed_soar2)
-# The harness type is significant! Legloop birds have faster horizontal speed when soaring
-hist(residuals(grSpeed_soar2))
-r.squaredGLMM(grSpeed_soar2)
-acf(residuals(grSpeed_soar2, retype="normalized"))
-plot(grSpeed_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(grSpeed_soar2)
-# Backtransformation of prediction for square root 
-modcoefs <- coef(summary(grSpeed_soar2))[,"Estimate"]
-int <- (modcoefs["(Intercept)"])^2 #intercept ground speed
-ll <- (sum(modcoefs[c("(Intercept)","harness_typeLegLoop")]))^2 #ground speed with effect of legloop
-ll-int #increase (difference) in ground speed with effect of legloop
+anova(airspeed_soar3, airspeed_soar2)
+# The harness type is significant! Legloop birds have faster airspeed when soaring
+summary(airspeed_soar2, correlation=F)
+hist(residuals(airspeed_soar2))
+r.squaredGLMM(airspeed_soar2)
+acf(residuals(airspeed_soar2, retype="normalized"))
+plot(airspeed_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
+qqmath(airspeed_soar2)
+# Response is not transformed, estimates are in m/s, no backtransformation needed 
 
-grSpeed_glide <- lmer(grSpeed.mean~
-                          harness_type*species_id+hourScale+
-                          nFixes+
-                          (1|individual)+(1|Date),
-                        data=highSp_segmentsGlide)
-summary(grSpeed_glide, correlation=F)
-hist(residuals(grSpeed_glide))
-r.squaredGLMM(grSpeed_glide)
-acf(residuals(grSpeed_glide, retype="normalized"))
-plot(grSpeed_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(grSpeed_glide)
-# Check for the overall effect of the species*harness interaction
-grSpeed_glide2 <- lmer(grSpeed.mean~
-                        harness_type+species_id+hourScale+
+airspeed_glide <- lmer(airspeed~
+                        harness_type*species_id+hourScale+
                         nFixes+
                         (1|individual)+(1|Date),
                       data=highSp_segmentsGlide)
-anova(grSpeed_glide, grSpeed_glide2)
-summary(grSpeed_glide2)
+summary(airspeed_glide, correlation=F)
+hist(residuals(airspeed_glide))
+r.squaredGLMM(airspeed_glide)
+acf(residuals(airspeed_glide, retype="normalized"))
+plot(airspeed_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
+qqmath(airspeed_glide)
+# Check for the overall effect of the species*harness interaction
+airspeed_glide2 <- lmer(airspeed~
+                         harness_type+species_id+hourScale+
+                         nFixes+
+                         (1|individual)+(1|Date),
+                       data=highSp_segmentsGlide)
+anova(airspeed_glide, airspeed_glide2)
 # The interaction is significant! Both harness type and species*harness are kept in the model.
+# Response is not transformed, estimates are in m/s, no backtransformation needed 
 
-#Calculate effect of leg-loop on black kite and on Hinalayan vulture
-#For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.37
+#Calculate effect of leg-loop on black kite and on Himalayan vulture
+#For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.43
 # For himalayan vulture is: Intercept + Himalayan vult + LL + LL:Himalayan vult,
 # so the difference between a him vult wearing a BP and a LL is:
-bp=9.19+4.61 #Him Vult wearing BP
-ll=9.19+4.61+1.37-2.12
-bp
-ll
+bp=9.47+4.796 #Him Vult wearing BP
+ll=9.47+4.796+1.43-2.243
+ll-bp
 
 
 # c. GLIDE RATIO MODEL ----
@@ -409,12 +414,78 @@ anova(vedba_pass3, vedba_pass2)
 # exp(x) == e^x
 100*(exp(0.08)-1)
 
+# In the final version airspeed was modelled instead of ground speed (see above)
+# # b. GROUND (HORIZONTAL) SPEED MODEL ----
+# # _______________________________________
+# grSpeed_soar <- lmer(sqrt(grSpeed.mean)~
+#                          harness_type*species_id+hourScale+
+#                          nFixes+
+#                          (1|individual)+(1|Date),
+#                        data=highSp_segmentsSoar)
+# summary(grSpeed_soar, correlation=F)
+# # Check for the overall effect of the species*harness interaction
+# grSpeed_soar2 <- lmer(sqrt(grSpeed.mean)~
+#                        harness_type+species_id+hourScale+
+#                        nFixes+
+#                        (1|individual)+(1|Date),
+#                      data=highSp_segmentsSoar)
+# anova(grSpeed_soar, grSpeed_soar2)
+# summary(grSpeed_soar2, correlation=F)
+# # Since the interaction is not significant, check for overall effect of the harness type
+# grSpeed_soar3 <- lmer(sqrt(grSpeed.mean)~
+#                         species_id+hourScale+
+#                         nFixes+
+#                         (1|individual)+(1|Date),
+#                       data=highSp_segmentsSoar)
+# anova(grSpeed_soar3, grSpeed_soar2)
+# # The harness type is significant! Legloop birds have faster horizontal speed when soaring
+# hist(residuals(grSpeed_soar2))
+# r.squaredGLMM(grSpeed_soar2)
+# acf(residuals(grSpeed_soar2, retype="normalized"))
+# plot(grSpeed_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
+# qqmath(grSpeed_soar2)
+# # Backtransformation of prediction for square root 
+# modcoefs <- coef(summary(grSpeed_soar2))[,"Estimate"]
+# int <- (modcoefs["(Intercept)"])^2 #intercept ground speed
+# ll <- (sum(modcoefs[c("(Intercept)","harness_typeLegLoop")]))^2 #ground speed with effect of legloop
+# ll-int #increase (difference) in ground speed with effect of legloop
+# 
+# grSpeed_glide <- lmer(grSpeed.mean~
+#                           harness_type*species_id+hourScale+
+#                           nFixes+
+#                           (1|individual)+(1|Date),
+#                         data=highSp_segmentsGlide)
+# summary(grSpeed_glide, correlation=F)
+# hist(residuals(grSpeed_glide))
+# r.squaredGLMM(grSpeed_glide)
+# acf(residuals(grSpeed_glide, retype="normalized"))
+# plot(grSpeed_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
+# qqmath(grSpeed_glide)
+# # Check for the overall effect of the species*harness interaction
+# grSpeed_glide2 <- lmer(grSpeed.mean~
+#                         harness_type+species_id+hourScale+
+#                         nFixes+
+#                         (1|individual)+(1|Date),
+#                       data=highSp_segmentsGlide)
+# anova(grSpeed_glide, grSpeed_glide2)
+# summary(grSpeed_glide2)
+# # The interaction is significant! Both harness type and species*harness are kept in the model.
+# 
+# #Calculate effect of leg-loop on black kite and on Hinalayan vulture
+# #For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.37
+# # For himalayan vulture is: Intercept + Himalayan vult + LL + LL:Himalayan vult,
+# # so the difference between a him vult wearing a BP and a LL is:
+# bp=9.19+4.61 #Him Vult wearing BP
+# ll=9.19+4.61+1.37-2.12
+# bp
+# ll
+
 
 # 2.3. T-TEST for CONTROL - Individual HERCULE ####
 #___________________________________________________
 
 # Import model dataset (only high speed segments)
-load("finalData/ModelDatasets_PerSegment_HIGHspeeds.rdata") #object highSp_segments
+load("finalData/ModelDatasets_PerSegment_HIGHspeeds_wind.rdata") #object highSp_segments
 
 # Exclude treatment
 control <- highSp_segments[which(highSp_segments$harnessExp %in% c("control")),]
@@ -461,13 +532,13 @@ wilcox.test(control$vertSpeed.mean~control$harness_type,
 control$vertSpeed.mean[control$harness_type!="LegLoop"]
 control$vertSpeed.mean[control$harness_type=="LegLoop"]
 
-# b. Ground speed ----
+# b. Airspeed ----
 #_____________________
-boxplot(grSpeed.mean~harness_type*kmeanSoar,
+boxplot(airspeed~harness_type*kmeanSoar,
         ylab="Mean ground speed (m/s)",
         col=c("chocolate","lightblue"),
         data=control)
-wilcox.test(control$grSpeed.mean~control$harness_type,
+wilcox.test(control$airspeed~control$harness_type,
             alternative = "two.sided")
 
 # c. Glide ratio ----
@@ -511,7 +582,7 @@ library(ggpubr)
 dir.create("Figures")
 
 # Import model dataset (only high speed segments)
-load("finalData/ModelDatasets_PerSegment_HIGHspeeds.rdata") #object highSp_segments
+load("finalData/ModelDatasets_PerSegment_HIGHspeeds_wind.rdata") #object highSp_segments
 
 highSp_segments$harness_type <- factor(highSp_segments$harness_type, levels=c("Backpack","LegLoop"))
 
@@ -530,11 +601,11 @@ vs <- ggplot(aes(y = vertSpeed.mean, x = harnessExp, fill = harness_type), data 
         axis.text.x= element_text(colour="black", size=10), axis.text.y= element_text(colour="black", size=10),
         axis.title.x = element_text(colour = "black", size=11.5), axis.title.y = element_text(colour = "black", size=11.5))
 
-gs <- ggplot(aes(y = grSpeed.mean, x = harnessExp, fill = harness_type), data = highSp_segments) + 
+as <- ggplot(aes(y = airspeed, x = harnessExp, fill = harness_type), data = highSp_segments) + 
   geom_boxplot() +
   scale_fill_manual(values=c("darkorange","dodgerblue")) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  xlab("") + ylab("Mean horizontal speed [m/s]\n") +
+  xlab("") + ylab("Airspeed [m/s]\n") +
   scale_x_discrete(labels=c("control" = "Control group", "treatment" = "Treatment group")) +
   theme(legend.position = "none",
         axis.text.x= element_text(colour="black", size=10), axis.text.y= element_text(colour="black", size=10),
@@ -561,9 +632,9 @@ height <- ggplot(aes(y = height.above.msl.max, x = harnessExp, fill = harness_ty
         axis.title.x = element_text(colour = "black", size=11.5), axis.title.y = element_text(colour = "black", size=11.5))
 
 
-pdf("Figures/multiboxplot_variables_harnesstype-treatment_newYlab.pdf", width=10, height=9)
+pdf("Figures/multiboxplot_variables_harnesstype-treatment_newYlab_airspeed.pdf", width=10, height=9)
 #png("Figures/multiboxplot_variables_harnesstype-treatment_newYlab.png", width=10, height=9, units="in", res=500)
-ggarrange(vs,gs,vedba,height, 
+ggarrange(vs,as,vedba,height, 
           labels = c("A","B","C","D"),
           ncol = 2, nrow = 2,
           widths = c(1,1,1,1))
