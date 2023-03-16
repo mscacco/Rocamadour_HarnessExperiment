@@ -1,7 +1,11 @@
 
 # Set working directory to the repository folder
 setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/ScriptsMartina_final/Rocamadour_HarnessExperiment")
+#setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/Dataset") #on Martina's computer
 
+# library(diffr) # compare the two last scripts
+# diffr("ScriptsMartina_final/gitStep2_HighSpeedSegment_Models_control&treatment_splitFlightBehaviour_airspeed_acf.R",
+#       "ScriptsMartina_final/Rocamadour_HarnessExperiment/gitStep2_HighSpeedSegment_Models_control&treatment_splitFlightBehaviour_airspeed_march2023.R")
 
 # 2.1. FILTERING - Create final dataset ####
 #____________________________________________
@@ -71,6 +75,8 @@ library(ggResidpanel)
 library(MuMIn)
 library(sp)
 library(geosphere)
+
+setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/ScriptsMartina_final/Rocamadour_HarnessExperiment")
 source("function_standardError.R") #function stderr
 
 # Import model dataset (we will use only high speed segments)
@@ -79,6 +85,10 @@ load("finalData/ModelDatasets_PerSegment_HIGHspeeds_wind.rdata") #object highSp_
 # Exclude data related to Hercule (the control individual)
 highSp_segments <- highSp_segments[which(highSp_segments$harnessExp %in% c("treatment")),]
 nrow(highSp_segments)
+
+# Count number and type of tags
+tags <- highSp_segments[,c("GPS_id", "ACC_id", "TAG_id", "ACC_type")]
+tags[!duplicated(tags),]
 
 # Add a variable indicatinf the order of the segments from the beginning of the flight trajectory
 ls <- split(highSp_segments, highSp_segments$tag_session_id)
@@ -131,31 +141,32 @@ acf(residuals(vertSpeed_soar, retype="normalized"))
 plot(vertSpeed_soar, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
 qqmath(vertSpeed_soar)
 # Check for the overall effect of the species*harness interaction
-vertSpeed_soar2 <- lmer(vertSpeed.mean~
-                          harness_type+species_id+hourScale+
-                         nFixes+
-                         (1|individual)+(1|Date),
-                       data=highSp_segmentsSoar)
-anova(vertSpeed_soar, vertSpeed_soar2)
+# vertSpeed_soar2 <- lmer(vertSpeed.mean~
+#                           harness_type+species_id+hourScale+
+#                          nFixes+
+#                          (1|individual)+(1|Date),
+#                        data=highSp_segmentsSoar)
+# anova(vertSpeed_soar, vertSpeed_soar2)
+
 # The interaction is significant, so both harness type and interaction species*harness are kept in the model
 # Legloop birds have higher climbing rate
 # Response is not transformed, estimates are in m/s, no backtransformation needed 
 
 q=quantile(highSp_segmentsGlide$vertSpeed.mean, seq(0,0.1, 0.001))
 plot(q)
-vertSpeed_glide <- lmer(vertSpeed.mean~
-                         harness_type*species_id+hourScale+
-                         nFixes+
-                         (1|individual)+(1|Date),
-                       data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
-summary(vertSpeed_glide, correlation=F)
+# vertSpeed_glide <- lmer(vertSpeed.mean~
+#                          harness_type*species_id+hourScale+
+#                          nFixes+
+#                          (1|individual)+(1|Date),
+#                        data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
+# summary(vertSpeed_glide, correlation=F)
 # Check for the overall effect of the species*harness interaction
 vertSpeed_glide2 <- lmer(vertSpeed.mean~
                            harness_type+species_id+hourScale+
                            nFixes+
                            (1|individual)+(1|Date),
                          data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
-anova(vertSpeed_glide,vertSpeed_glide2)
+#anova(vertSpeed_glide,vertSpeed_glide2)
 summary(vertSpeed_glide2, correlation=F)
 hist(residuals(vertSpeed_glide2))
 r.squaredGLMM(vertSpeed_glide2)
@@ -163,12 +174,13 @@ acf(residuals(vertSpeed_glide2, retype="normalized"))
 plot(vertSpeed_glide2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
 qqmath(vertSpeed_glide2)
 # Since the interaction is not significant, check for overall effect of the harness type
-vertSpeed_glide3 <- lmer(vertSpeed.mean~
-                           species_id+hourScale+
-                           nFixes+
-                           (1|individual)+(1|Date),
-                         data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
-anova(vertSpeed_glide3,vertSpeed_glide2)
+# vertSpeed_glide3 <- lmer(vertSpeed.mean~
+#                            species_id+hourScale+
+#                            nFixes+
+#                            (1|individual)+(1|Date),
+#                          data=highSp_segmentsGlide[-which.min(highSp_segmentsGlide$vertSpeed.mean),])
+# anova(vertSpeed_glide3,vertSpeed_glide2)
+
 # The harness type is slightly significant and indicates lower sink speed when gliding!
 # Response is not transformed, estimates are in m/s, no backtransformation needed 
 
@@ -176,28 +188,28 @@ anova(vertSpeed_glide3,vertSpeed_glide2)
 # b. AIRSPEED MODEL ----
 # _______________________
 
+highSp_segmentsSoar_sub <- highSp_segmentsSoar[seq(1, nrow(highSp_segmentsSoar), by=2),]
+
 airspeed_soar <- lmer(airspeed~
                        harness_type*species_id+hourScale+
                        nFixes+
                        (1|individual)+(1|Date),
-                     data=highSp_segmentsSoar)
-summary(airspeed_soar, correlation=F)
+                     data=highSp_segmentsSoar_sub)
 # Check for the overall effect of the species*harness interaction
 airspeed_soar2 <- lmer(airspeed~
                         harness_type+species_id+hourScale+
                         nFixes+
                         (1|individual)+(1|Date),
-                      data=highSp_segmentsSoar)
+                      data=highSp_segmentsSoar_sub)
 anova(airspeed_soar, airspeed_soar2)
-summary(airspeed_soar2, correlation=F)
 # Since the interaction is not significant, check for overall effect of the harness type
 airspeed_soar3 <- lmer(airspeed~
                         species_id+hourScale+
                         nFixes+
                         (1|individual)+(1|Date),
-                      data=highSp_segmentsSoar)
+                      data=highSp_segmentsSoar_sub)
 anova(airspeed_soar3, airspeed_soar2)
-# The harness type is significant! Legloop birds have faster airspeed when soaring
+# Both interaction legloop*species and legloop effect non significant, we still report the second model with the non-significant effect
 summary(airspeed_soar2, correlation=F)
 hist(residuals(airspeed_soar2))
 r.squaredGLMM(airspeed_soar2)
@@ -206,34 +218,36 @@ plot(airspeed_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
 qqmath(airspeed_soar2)
 # Response is not transformed, estimates are in m/s, no backtransformation needed 
 
+highSp_segmentsGlide_sub <- highSp_segmentsGlide[seq(1, nrow(highSp_segmentsGlide), by=2),]
+
 airspeed_glide <- lmer(airspeed~
                         harness_type*species_id+hourScale+
                         nFixes+
                         (1|individual)+(1|Date),
-                      data=highSp_segmentsGlide)
-summary(airspeed_glide, correlation=F)
-hist(residuals(airspeed_glide))
-r.squaredGLMM(airspeed_glide)
-acf(residuals(airspeed_glide, retype="normalized"))
-plot(airspeed_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(airspeed_glide)
+                      data=highSp_segmentsGlide_sub)
 # Check for the overall effect of the species*harness interaction
 airspeed_glide2 <- lmer(airspeed~
                          harness_type+species_id+hourScale+
                          nFixes+
                          (1|individual)+(1|Date),
-                       data=highSp_segmentsGlide)
+                       data=highSp_segmentsGlide_sub)
 anova(airspeed_glide, airspeed_glide2)
-# The interaction is significant! Both harness type and species*harness are kept in the model.
-# Response is not transformed, estimates are in m/s, no backtransformation needed 
+# Since the interaction is not significant, check for overall effect of the harness type
+airspeed_glide3 <- lmer(airspeed~
+                         species_id+hourScale+
+                         nFixes+
+                         (1|individual)+(1|Date),
+                       data=highSp_segmentsGlide_sub)
+anova(airspeed_glide3, airspeed_glide2)
+# Both interaction legloop*species and legloop effect non significant, we still report the second model with the non-significant effect
+summary(airspeed_glide2, correlation=F)
+hist(residuals(airspeed_glide2))
+r.squaredGLMM(airspeed_glide2)
+acf(residuals(airspeed_glide2, retype="normalized"))
+plot(airspeed_glide2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
+qqmath(airspeed_glide2)
 
-#Calculate effect of leg-loop on black kite and on Himalayan vulture
-#For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.43
-# For himalayan vulture is: Intercept + Himalayan vult + LL + LL:Himalayan vult,
-# so the difference between a him vult wearing a BP and a LL is:
-bp=9.47+4.796 #Him Vult wearing BP
-ll=9.47+4.796+1.43-2.243
-ll-bp
+# Response is not transformed, estimates are in m/s, no backtransformation needed 
 
 
 # c. GLIDE RATIO MODEL ----
@@ -251,17 +265,12 @@ highSp_segmentsGlide_sub <- highSp_segmentsGlide[highSp_segmentsGlide$vertSpeed.
 hist(highSp_segmentsGlide_sub$glideRatio.segm, breaks="FD", xlim=c(0,60))
 hist(sqrt(highSp_segmentsGlide_sub$glideRatio.segm), breaks="FD")
 
-glRatio_glide <- lmer(sqrt(glideRatio.segm)~
-                        harness_type*species_id+hourScale+
-                        nFixes+#vedbaAvg_smooth05s_flap.mean+#height.above.msl.max+#segment.from.start+
-                        (1|individual)+(1|Date),
-                      data=highSp_segmentsGlide_sub)
-summary(glRatio_glide, correlation=F)
-hist(residuals(glRatio_glide))
-r.squaredGLMM(glRatio_glide)
-acf(residuals(glRatio_glide, retype="normalized"))
-plot(glRatio_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(glRatio_glide)
+# glRatio_glide <- lmer(sqrt(glideRatio.segm)~
+#                         harness_type*species_id+hourScale+
+#                         nFixes+#vedbaAvg_smooth05s_flap.mean+#height.above.msl.max+#segment.from.start+
+#                         (1|individual)+(1|Date),
+#                       data=highSp_segmentsGlide_sub)
+# summary(glRatio_glide, correlation=F)
 # Check for the overall effect of the species*harness interaction
 glRatio_glide2 <- lmer(sqrt(glideRatio.segm)~
                          harness_type+species_id+hourScale+
@@ -269,15 +278,15 @@ glRatio_glide2 <- lmer(sqrt(glideRatio.segm)~
                          (1|individual)+(1|Date),
                        data=highSp_segmentsGlide_sub)
 anova(glRatio_glide, glRatio_glide2)
-summary(glRatio_glide2)
 # Since the interaction is not significant, check for overall effect of the harness type
-glRatio_glide3 <- lmer(sqrt(glideRatio.segm)~
-                        species_id+hourScale+
-                        nFixes+
-                        (1|individual)+(1|Date),
-                      data=highSp_segmentsGlide_sub)
-anova(glRatio_glide3, glRatio_glide2)
+# glRatio_glide3 <- lmer(sqrt(glideRatio.segm)~
+#                         species_id+hourScale+
+#                         nFixes+
+#                         (1|individual)+(1|Date),
+#                       data=highSp_segmentsGlide_sub)
+# anova(glRatio_glide3, glRatio_glide2)
 # The harness type is significant, legloop birds have slightly higher glide ratio
+summary(glRatio_glide2, correlation=F)
 hist(residuals(glRatio_glide2))
 r.squaredGLMM(glRatio_glide2)
 acf(residuals(glRatio_glide2, retype="normalized"))
@@ -297,14 +306,13 @@ ll-int #increase (difference) in glide ratio with effect of legloop, which means
 # is the one associated to the centroid of the segment, which reliability also depend on the length and area that the segment occupies.
 
 # Subsample to reduce temporal autocorrelation
-highSp_segmentsSoar_sub <- highSp_segmentsSoar[seq(1, nrow(highSp_segmentsSoar), by=2),]
+highSp_segmentsSoar_sub <- highSp_segmentsSoar[seq(1, nrow(highSp_segmentsSoar), by=4),]
 
-height_soar <- lmer(log(height.above.msl.max)~
-                      harness_type*species_id+hourScale+
-                      nFixes+
-                      (1|individual)+(1|Date),
-                    data=highSp_segmentsSoar_sub)
-summary(height_soar, correlation=F)
+# height_soar <- lmer(log(height.above.msl.max)~
+#                       harness_type*species_id+hourScale+
+#                       nFixes+
+#                       (1|individual)+(1|Date),
+#                     data=highSp_segmentsSoar_sub)
 # Check for the overall effect of the species*harness interaction
 height_soar2 <- lmer(log(height.above.msl.max)~
                        harness_type+species_id+hourScale+
@@ -319,49 +327,19 @@ acf(residuals(height_soar2, retype="normalized"))
 plot(height_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
 qqmath(height_soar2)
 # Since the interaction term is slightly significant we also check for the overall effect of harness type
-height_soar3 <- lmer(log(height.above.msl.max)~
-                       species_id+hourScale+
-                       nFixes+
-                       (1|individual)+(1|Date),
-                     data=highSp_segmentsSoar_sub)
-anova(height_soar3, height_soar2)
+# height_soar3 <- lmer(log(height.above.msl.max)~
+#                        species_id+hourScale+
+#                        nFixes+
+#                        (1|individual)+(1|Date),
+#                      data=highSp_segmentsSoar_sub)
+# anova(height_soar3, height_soar2)
 # Which is highly significant, legloop birds reach higher altitudes during soaring
 
-highSp_segmentsGlide_sub <- highSp_segmentsGlide[seq(1, nrow(highSp_segmentsGlide), by=2),]
-
-height_glide <- lmer(log(height.above.msl.max)~
-                       harness_type*species_id+hourScale+
-                       nFixes+
-                       (1|individual)+(1|Date),
-                     data=highSp_segmentsGlide_sub)
-summary(height_glide, correlation=F)
-# Check for the overall effect of the species*harness interaction
-height_glide2 <- lmer(log(height.above.msl.max)~
-                       harness_type+species_id+hourScale+
-                       nFixes+#segment.from.start+
-                       (1|individual)+(1|Date),
-                     data=highSp_segmentsGlide_sub)
-anova(height_glide, height_glide2)
-summary(height_glide2, correlation=F)
-hist(residuals(height_glide2))
-r.squaredGLMM(height_glide2)
-acf(residuals(height_glide2, retype="normalized"))
-plot(height_glide2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(height_glide2)
-# Since the interaction is not significant we also check for the overall effect of harness type
-height_glide3 <- lmer(log(height.above.msl.max)~
-                        species_id+hourScale+
-                        nFixes+
-                        (1|individual)+(1|Date),
-                      data=highSp_segmentsGlide_sub)
-anova(height_glide3, height_glide2)
-# The effect of harness type is significant and legloop birds reach higher heights during gliding
 
 # Correct interpretation of log-linear models should be: %changeY = 100 * (e^beta - 1)
 # But for very small beta, e^beta ~= 1 + beta, so %changeY ~= beta
 # exp(x) == e^x
-100*(exp(0.19)-1)
-100*(exp(0.11)-1)
+100*(exp(0.23)-1) #coefficient of harness.type=legloop
 
 
 # e. VEDBA MODEL ----
@@ -372,19 +350,13 @@ table(highSp_segments$kmeanAct)
 
 # Subsample to remove some temporal autocorrelation
 highSp_segments_pass_sub <- highSp_segments[which(highSp_segments$kmeanAct=="pass"),]
-highSp_segments_pass_sub <- highSp_segments_pass_sub[seq(1, nrow(highSp_segments_pass_sub), by=2),]
+highSp_segments_pass_sub <- highSp_segments_pass_sub[seq(1, nrow(highSp_segments_pass_sub), by=3),]
 
-vedba_pass <- lmer(log(vedbaAvg_smooth05s_flap.mean)~
-                     harness_type*species_id+hourScale+
-                     nFixes+
-                     (1|individual)+(1|Date), #+(1|ACC_type) the acc type effect is already absorbed by the combination of individual + date cause the type of ACC was consistent for the same individual during the same day
-                   data=highSp_segments_pass_sub) 
-summary(vedba_pass, correlation=F)
-hist(residuals(vedba_pass))
-r.squaredGLMM(vedba_pass)
-acf(residuals(vedba_pass, retype="normalized"))
-plot(vedba_pass, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-qqmath(vedba_pass)
+# vedba_pass <- lmer(log(vedbaAvg_smooth05s_flap.mean)~
+#                      harness_type*species_id+hourScale+
+#                      nFixes+
+#                      (1|individual)+(1|Date), #+(1|ACC_type) the acc type effect is already absorbed by the combination of individual + date cause the type of ACC was consistent for the same individual during the same day
+#                    data=highSp_segments_pass_sub) 
 # Check for the overall effect of the species*harness interaction
 vedba_pass2 <- lmer(log(vedbaAvg_smooth05s_flap.mean)~
                      harness_type+species_id+hourScale+
@@ -399,86 +371,19 @@ acf(residuals(vedba_pass2, retype="normalized"))
 plot(vedba_pass2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
 qqmath(vedba_pass2)
 # The effect of the interaction is slightly significant, so we check the effect of harness type
-vedba_pass3 <- lmer(log(vedbaAvg_smooth05s_flap.mean)~
-                      species_id+hourScale+
-                      nFixes+
-                      (1|individual)+(1|Date),
-                    data=highSp_segments_pass_sub)
-anova(vedba_pass3, vedba_pass2)
+# vedba_pass3 <- lmer(log(vedbaAvg_smooth05s_flap.mean)~
+#                       species_id+hourScale+
+#                       nFixes+
+#                       (1|individual)+(1|Date),
+#                     data=highSp_segments_pass_sub)
+# anova(vedba_pass3, vedba_pass2)
 # Legloop is highly significant, so we keep that without interaction
-# Legloop individuals spend 0.08% less energy than backpack individuals
 
 # With log transformation coefficient are interpreted as percentages of change in the response variable
 # Correct interpretation of log-linear models should be: %changeY = 100 * (e^beta - 1)
 # But for very small beta, e^beta ~= 1 + beta, so %changeY ~= beta
 # exp(x) == e^x
-100*(exp(0.08)-1)
-
-# In the final version airspeed was modelled instead of ground speed (see above)
-# # b. GROUND (HORIZONTAL) SPEED MODEL ----
-# # _______________________________________
-# grSpeed_soar <- lmer(sqrt(grSpeed.mean)~
-#                          harness_type*species_id+hourScale+
-#                          nFixes+
-#                          (1|individual)+(1|Date),
-#                        data=highSp_segmentsSoar)
-# summary(grSpeed_soar, correlation=F)
-# # Check for the overall effect of the species*harness interaction
-# grSpeed_soar2 <- lmer(sqrt(grSpeed.mean)~
-#                        harness_type+species_id+hourScale+
-#                        nFixes+
-#                        (1|individual)+(1|Date),
-#                      data=highSp_segmentsSoar)
-# anova(grSpeed_soar, grSpeed_soar2)
-# summary(grSpeed_soar2, correlation=F)
-# # Since the interaction is not significant, check for overall effect of the harness type
-# grSpeed_soar3 <- lmer(sqrt(grSpeed.mean)~
-#                         species_id+hourScale+
-#                         nFixes+
-#                         (1|individual)+(1|Date),
-#                       data=highSp_segmentsSoar)
-# anova(grSpeed_soar3, grSpeed_soar2)
-# # The harness type is significant! Legloop birds have faster horizontal speed when soaring
-# hist(residuals(grSpeed_soar2))
-# r.squaredGLMM(grSpeed_soar2)
-# acf(residuals(grSpeed_soar2, retype="normalized"))
-# plot(grSpeed_soar2, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-# qqmath(grSpeed_soar2)
-# # Backtransformation of prediction for square root 
-# modcoefs <- coef(summary(grSpeed_soar2))[,"Estimate"]
-# int <- (modcoefs["(Intercept)"])^2 #intercept ground speed
-# ll <- (sum(modcoefs[c("(Intercept)","harness_typeLegLoop")]))^2 #ground speed with effect of legloop
-# ll-int #increase (difference) in ground speed with effect of legloop
-# 
-# grSpeed_glide <- lmer(grSpeed.mean~
-#                           harness_type*species_id+hourScale+
-#                           nFixes+
-#                           (1|individual)+(1|Date),
-#                         data=highSp_segmentsGlide)
-# summary(grSpeed_glide, correlation=F)
-# hist(residuals(grSpeed_glide))
-# r.squaredGLMM(grSpeed_glide)
-# acf(residuals(grSpeed_glide, retype="normalized"))
-# plot(grSpeed_glide, resid(., scaled=TRUE) ~ fitted(.), abline = 0)
-# qqmath(grSpeed_glide)
-# # Check for the overall effect of the species*harness interaction
-# grSpeed_glide2 <- lmer(grSpeed.mean~
-#                         harness_type+species_id+hourScale+
-#                         nFixes+
-#                         (1|individual)+(1|Date),
-#                       data=highSp_segmentsGlide)
-# anova(grSpeed_glide, grSpeed_glide2)
-# summary(grSpeed_glide2)
-# # The interaction is significant! Both harness type and species*harness are kept in the model.
-# 
-# #Calculate effect of leg-loop on black kite and on Hinalayan vulture
-# #For the black kite, LL is the difference of a black kite wearing LL versus BP = 1.37
-# # For himalayan vulture is: Intercept + Himalayan vult + LL + LL:Himalayan vult,
-# # so the difference between a him vult wearing a BP and a LL is:
-# bp=9.19+4.61 #Him Vult wearing BP
-# ll=9.19+4.61+1.37-2.12
-# bp
-# ll
+100*(exp(0.094)-1)
 
 
 # 2.3. T-TEST for CONTROL - Individual HERCULE ####
@@ -579,6 +484,7 @@ wilcox.test(control$vedbaAvg_smooth05s_flap.mean~control$harness_type,
 
 library(ggplot2)
 library(ggpubr)
+library(gridExtra)
 dir.create("Figures")
 
 # Import model dataset (only high speed segments)
@@ -594,7 +500,7 @@ vs <- ggplot(aes(y = vertSpeed.mean, x = harnessExp, fill = harness_type), data 
   scale_fill_manual(values=c("darkorange","dodgerblue"), name="Harness type") +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("") + ylab("Mean vertical speed [m/s]\n") +
-  scale_x_discrete(labels=c("control" = "Control group", "treatment" = "Treatment group")) +
+  scale_x_discrete(labels=c("control" = "Validation group", "treatment" = "Experimental group")) +
   theme(legend.position = c(0.15,0.85), 
         legend.background = element_rect(fill = "transparent", colour = NA),
         legend.key=element_blank(),
@@ -606,7 +512,7 @@ as <- ggplot(aes(y = airspeed, x = harnessExp, fill = harness_type), data = high
   scale_fill_manual(values=c("darkorange","dodgerblue")) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("") + ylab("Airspeed [m/s]\n") +
-  scale_x_discrete(labels=c("control" = "Control group", "treatment" = "Treatment group")) +
+  scale_x_discrete(labels=c("control" = "Validation group", "treatment" = "Experimental group")) +
   theme(legend.position = "none",
         axis.text.x= element_text(colour="black", size=10), axis.text.y= element_text(colour="black", size=10),
         axis.title.x = element_text(colour = "black", size=11.5), axis.title.y = element_text(colour = "black", size=11.5))
@@ -616,7 +522,7 @@ vedba <- ggplot(aes(y = vedbaAvg_smooth05s_flap.mean, x = harnessExp, fill = har
   scale_fill_manual(values=c("darkorange","dodgerblue")) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("") + ylab("Mean VeDBA [g]\n") +
-  scale_x_discrete(labels=c("control" = "Control group", "treatment" = "Treatment group")) +
+  scale_x_discrete(labels=c("control" = "Validation group", "treatment" = "Experimental group")) +
   theme(legend.position = "none",
         axis.text.x= element_text(colour="black", size=10), axis.text.y= element_text(colour="black", size=10),
         axis.title.x = element_text(colour = "black", size=11.5), axis.title.y = element_text(colour = "black", size=11.5))
@@ -626,13 +532,13 @@ height <- ggplot(aes(y = height.above.msl.max, x = harnessExp, fill = harness_ty
   scale_fill_manual(values=c("darkorange","dodgerblue")) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("") + ylab("Maximum height a.s.l. [m]\n") +
-  scale_x_discrete(labels=c("control" = "Control group", "treatment" = "Treatment group")) +
+  scale_x_discrete(labels=c("control" = "Validation group", "treatment" = "Experimental group")) +
   theme(legend.position = "none",
         axis.text.x= element_text(colour="black", size=10), axis.text.y= element_text(colour="black", size=10),
         axis.title.x = element_text(colour = "black", size=11.5), axis.title.y = element_text(colour = "black", size=11.5))
 
-
-pdf("Figures/multiboxplot_variables_harnesstype-treatment_newYlab_airspeed.pdf", width=10, height=9)
+pdf("Boxplots/multiboxplot_variables_harnesstype-treatment_newYlab_airspeed_newXlab.pdf", width=10, height=9)
+#pdf("Figures/multiboxplot_variables_harnesstype-treatment_newYlab_airspeed_newXlab.pdf", width=10, height=9)
 #png("Figures/multiboxplot_variables_harnesstype-treatment_newYlab.png", width=10, height=9, units="in", res=500)
 ggarrange(vs,as,vedba,height, 
           labels = c("A","B","C","D"),

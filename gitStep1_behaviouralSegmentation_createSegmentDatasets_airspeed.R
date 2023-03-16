@@ -240,7 +240,7 @@ write.csv(summarySegment, "finalData/df_summaryValuesPerSegment.csv", row.names=
 
 df_segments <- read.csv("finalData/df_summaryValuesPerSegment.csv", as.is = T)
 
-# Calculate tiemstamp corresponding to the middle point of the segment
+# Calculate timestamp corresponding to the middle point of the segment
 df_segments$start.timestamp <- as.POSIXct(df_segments$start.timestamp, format="%Y-%m-%d %H:%M:%OS", tz="UTC")
 df_segments$end.timestamp <- as.POSIXct(df_segments$end.timestamp, format="%Y-%m-%d %H:%M:%OS", tz="UTC")
 #head(df_segments$segmDuration);head(difftime(df_segments$end.timestamp, df_segments$start.timestamp, units="secs"))

@@ -9,6 +9,8 @@ setwd("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExp
 
 # Import summary information related to each flight session (dataset created in step 1.3.b)
 df_FL <- read.csv("finalData/flightSession_summaryDataset.csv", as.is=T)
+# same file as in:
+#df_FL <- read.csv("/home/mscacco/ownCloud/Martina/ProgettiVari/Rocamadour/Arianna_HarnessExperiment/Dataset/finalData/datasum_id.csv", as.is=T) #on Martina's computer
 
 # Apply the same filters used in the treatment analysis (step 2):
 # filter out tail attachment, control group, "perch to perch" flight sessions and species that were equipped with only one of the two harness types
